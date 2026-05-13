@@ -1,115 +1,105 @@
-# James Blinds — Mission Control
+# James Blinds — Mission Control MVP
 
-Internal operations system for James Blinds. Manages customers, jobs, quotes, orders, installations, inventory, and staff tasks.
+Internal operations system for James Blinds. This MVP slice covers **login** and the **dashboard**.
 
----
+## Stack
 
-## Quick Start
+- Node.js + Express
+- PostgreSQL
+- EJS (server-rendered HTML templates)
+- bcrypt (password hashing)
+- express-session (auth sessions)
 
-### Prerequisites
+## Local Setup
+
+### 1. Prerequisites
+
 - Node.js 18+
-- A [Supabase](https://supabase.com) project (free tier is fine for development)
+- PostgreSQL running locally
 
-### 1. Clone and install
+### 2. Create the database
 
 ```bash
-cd frontend
+psql -U postgres -c "CREATE DATABASE james_blinds_mvp;"
+```
+
+### 3. Run the schema
+
+```bash
+psql -U postgres -d james_blinds_mvp -f database/schema.sql
+```
+
+### 4. Configure environment
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and fill in your PostgreSQL credentials and a session secret.
+
+### 5. Install dependencies
+
+```bash
 npm install
 ```
 
-### 2. Configure environment
+### 6. Seed the database
 
 ```bash
-cp ../.env.example .env
-# Edit .env — fill in your Supabase URL and anon key
+npm run seed
 ```
 
-Find your keys in: **Supabase dashboard → Project Settings → API**
+This creates roles, an admin user, and sample projects.
 
-### 3. Run the database migration
+**Default admin credentials:**
+- Email: `admin@jamesblinds.com`
+- Password: `password123`
 
-In Supabase dashboard → **SQL Editor**, paste and run the contents of:
-
-```
-supabase/migrations/001_initial_schema.sql
-```
-
-This creates all tables, indexes, triggers, and a seed admin user.
-
-### 4. Start the dev server
+### 7. Start the dev server
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173)
-
-> **Note:** The dashboard and all pages work immediately with mock data — no Supabase connection required for the initial UI. Connect Supabase when you're ready to work with real data.
+Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
 ## Project Structure
 
 ```
-├── frontend/           React + TypeScript + Vite app
-│   └── src/
-│       ├── components/ Reusable UI components (layout)
-│       ├── data/       Mock data for local development
-│       ├── lib/        Supabase client singleton
-│       ├── pages/      One component per route
-│       ├── services/   All database operations
-│       ├── styles/     CSS tokens and global utility classes
-│       ├── types/      TypeScript entity types
-│       └── utils/      Formatters and helpers
-├── supabase/
-│   └── migrations/     SQL schema files
-├── docs/
-│   └── architecture.md Full architecture documentation
-├── .env.example        Environment variable template
-└── README.md
+├── app.js               # Express app entry point
+├── config/
+│   └── db.js            # PostgreSQL connection pool
+├── database/
+│   ├── schema.sql       # CREATE TABLE statements
+│   └── seed.js          # Seed script (roles, admin user, sample projects)
+├── models/              # SQL queries — one file per table
+├── controllers/         # Request handling and business logic
+├── routes/              # Route definitions
+├── middleware/
+│   └── authMiddleware.js  # Session-based auth guard
+├── views/               # EJS templates rendered as .html
+├── public/css/          # Static styles
+└── .env.example         # Environment variable template
 ```
 
----
+## Routes
 
-## Pages
+| Method | Path         | Description                        |
+|--------|--------------|------------------------------------|
+| GET    | `/`          | Redirects to `/login`              |
+| GET    | `/login`     | Login page                         |
+| POST   | `/login`     | Authenticate and start session     |
+| GET    | `/logout`    | Destroy session, redirect to login |
+| GET    | `/dashboard` | Dashboard (requires login)         |
 
-| Route                | Page                |
-|----------------------|---------------------|
-| `/`                  | Dashboard           |
-| `/customers`         | Customer list       |
-| `/customers/:id`     | Customer detail     |
-| `/jobs`              | Job list            |
-| `/jobs/:id`          | Job detail          |
-| `/quotes`            | Quote list          |
-| `/orders`            | Order list          |
-| `/installations`     | Installation schedule |
-| `/inventory`         | Inventory / stock   |
-| `/tasks`             | Staff task board    |
-| `/settings`          | System settings     |
+## Planned Modules (not yet built)
 
----
-
-## Database
-
-See [`supabase/migrations/001_initial_schema.sql`](supabase/migrations/001_initial_schema.sql) for the full schema with inline comments explaining every design decision.
-
-Core tables: `customers`, `addresses`, `contacts`, `jobs`, `job_status_history`, `measurements`, `products`, `quotes`, `quote_items`, `orders`, `order_items`, `installations`, `inventory_items`, `staff_users`, `tasks`, `activity_logs`
-
----
-
-## Architecture
-
-See [`docs/architecture.md`](docs/architecture.md) for the full architecture guide including layering rules, development roadmap, and design rationale.
-
----
-
-## Available Scripts
-
-From the `frontend/` directory:
-
-| Command           | Description                          |
-|-------------------|--------------------------------------|
-| `npm run dev`     | Start dev server at localhost:5173   |
-| `npm run build`   | Production build to `dist/`          |
-| `npm run preview` | Preview production build locally     |
-| `npm run typecheck` | Run TypeScript type checking       |
+- `/projects` — full project CRUD and user assignment
+- `/users` — user management
+- Materials module
+- Scheduling module
+- Punch list module
+- QBO billing integration
+- AI assistant

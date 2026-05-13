@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — James Blinds</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <nav class="navbar">
+    <span class="brand">James Blinds <span class="brand-sub">Mission Control</span></span>
+    <div class="nav-right">
+      <span class="nav-user">
+        <%= user.name %>
+        <span class="badge badge-role"><%= user.role %></span>
+      </span>
+      <a href="/logout" class="btn btn-ghost">Log out</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <h2>Dashboard</h2>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value"><%= totalProjects %></div>
+        <div class="stat-label">Total Projects</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value"><%= activeProjects %></div>
+        <div class="stat-label">Active Projects</div>
+      </div>
+      <!-- TODO: add invoiced / billed this month stat (QBO module) -->
+      <!-- TODO: add open punch items stat (punch module) -->
+    </div>
+
+    <!-- Recent Projects -->
+    <div class="section-header">
+      <h3>Recent Projects</h3>
+      <!-- TODO: link to /projects/new when project create form is built -->
+    </div>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>Status</th>
+          <th>Contract Value</th>
+          <th>Project Manager</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% if (recentProjects.length === 0) { %>
+          <tr>
+            <td colspan="4" class="empty">No projects yet.</td>
+          </tr>
+        <% } else { %>
+          <% recentProjects.forEach(function(p) { %>
+            <tr>
+              <td><%= p.project_name %></td>
+              <td><span class="badge badge-status badge-<%= p.status %>"><%= p.status %></span></td>
+              <td><%= p.contract_value ? '$' + Number(p.contract_value).toLocaleString() : '—' %></td>
+              <td><%= p.project_manager_name || '—' %></td>
+            </tr>
+          <% }); %>
+        <% } %>
+      </tbody>
+    </table>
+
+    <!-- Future module placeholders -->
+    <!-- TODO: Materials section (materials module) -->
+    <!-- TODO: Schedule / calendar view (schedule module) -->
+    <!-- TODO: Punch list summary (punch module) -->
+    <!-- TODO: Billing status (QBO module) -->
+  </main>
+
+</body>
+</html>
