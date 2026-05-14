@@ -29,6 +29,7 @@ export default function Dashboard() {
         </span>
         <div className="nav-right">
           <Link to="/projects" className="btn btn-ghost">Projects</Link>
+          <Link to="/users"   className="btn btn-ghost">Team</Link>
           <span className="nav-user">
             {user.name}
             <span className="badge badge-role">{user.role}</span>

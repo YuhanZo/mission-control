@@ -55,7 +55,7 @@ Destroy the current session.
 
 ---
 
-### GET /api/auth/me 🔒
+### GET /api/auth/me
 
 Return the currently logged-in user.
 
@@ -76,7 +76,7 @@ Return the currently logged-in user.
 
 ## Dashboard
 
-### GET /api/dashboard 🔒
+### GET /api/dashboard
 
 Return project stats and recent projects.
 
@@ -105,7 +105,7 @@ Return project stats and recent projects.
 
 ## Projects
 
-### GET /api/projects 🔒
+### GET /api/projects
 
 List all projects.
 
@@ -128,7 +128,7 @@ List all projects.
 
 ---
 
-### GET /api/projects/:id 🔒
+### GET /api/projects/:id
 
 Get a single project with its assigned team members.
 
@@ -166,7 +166,7 @@ Get a single project with its assigned team members.
 
 ---
 
-### POST /api/projects 🔒
+### POST /api/projects
 
 Create a new project.
 
@@ -208,7 +208,7 @@ Only `project_name` is required. All other fields are optional.
 
 ---
 
-### PUT /api/projects/:id 🔒
+### PUT /api/projects/:id
 
 Update an existing project. Send only the fields you want to change.
 
@@ -242,7 +242,7 @@ Update an existing project. Send only the fields you want to change.
 
 ---
 
-### POST /api/projects/:id/users 🔒
+### POST /api/projects/:id/users 
 
 Assign a user to a project with a relationship type.
 
@@ -281,7 +281,7 @@ Assign a user to a project with a relationship type.
 
 ---
 
-### DELETE /api/projects/:id/users/:userId 🔒
+### DELETE /api/projects/:id/users/:userId 
 
 Remove a user from a project.
 

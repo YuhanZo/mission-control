@@ -11,6 +11,7 @@ export default function ProjectDetail() {
 
   const [project, setProject]           = useState(null);
   const [assignedUsers, setAssignedUsers] = useState([]);
+  const [allUsers, setAllUsers]         = useState([]);
   const [editing, setEditing]           = useState(false);
   const [form, setForm]                 = useState({});
   const [assignForm, setAssignForm]     = useState({ user_id: '', relationship_type: 'installer' });
@@ -19,11 +20,12 @@ export default function ProjectDetail() {
   const [saving, setSaving]             = useState(false);
 
   useEffect(() => {
-    api.project(id)
-      .then(d => {
+    Promise.all([api.project(id), api.users()])
+      .then(([d, ud]) => {
         setProject(d.project);
         setForm(d.project);
         setAssignedUsers(d.assignedUsers);
+        setAllUsers(ud.users);
       })
       .catch(() => navigate('/projects'));
   }, [id, navigate]);
@@ -167,14 +169,17 @@ export default function ProjectDetail() {
           <h4>Assign a team member</h4>
           <div className="form-row">
             <div className="form-group">
-              <label>User ID</label>
-              <input
-                type="number"
-                placeholder="User ID"
+              <label>Team Member</label>
+              <select
                 value={assignForm.user_id}
                 onChange={e => setAssignForm(f => ({ ...f, user_id: e.target.value }))}
                 required
-              />
+              >
+                <option value="">— Select member —</option>
+                {allUsers.map(u => (
+                  <option key={u.id} value={u.id}>{u.name} ({u.email})</option>
+                ))}
+              </select>
             </div>
             <div className="form-group">
               <label>Relationship</label>

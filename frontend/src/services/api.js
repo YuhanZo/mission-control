@@ -20,6 +20,11 @@ export const api = {
   // Dashboard
   dashboard: () => request('/api/dashboard'),
 
+  // Users
+  users:       ()       => request('/api/users'),
+  createUser:  (data)   => request('/api/users',       { method: 'POST', body: JSON.stringify(data) }),
+  roles:       ()       => request('/api/users/roles'),
+
   // Projects
   projects:       ()           => request('/api/projects'),
   project:        (id)         => request(`/api/projects/${id}`),

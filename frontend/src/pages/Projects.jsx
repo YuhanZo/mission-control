@@ -53,6 +53,7 @@ export default function Projects() {
         </span>
         <div className="nav-right">
           <Link to="/dashboard" className="btn btn-ghost">Dashboard</Link>
+          <Link to="/users"    className="btn btn-ghost">Team</Link>
         </div>
       </nav>
 
