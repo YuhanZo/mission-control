@@ -1,45 +1,50 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
 const session = require('express-session');
-const path = require('path');
 
-const authRoutes = require('./routes/authRoutes');
+const authRoutes      = require('./routes/authRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 
-const app = express();
+const app  = express();
 const PORT = process.env.PORT || 3000;
 
-// Parse URL-encoded form bodies
-app.use(express.urlencoded({ extended: false }));
-
-// Serve static files from /public
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Use EJS to render .html view files
-app.engine('html', require('ejs').renderFile);
-app.set('view engine', 'html');
-app.set('views', path.join(__dirname, 'views'));
-
-// Session — stored in memory for MVP
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'dev-secret-change-me',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { maxAge: 8 * 60 * 60 * 1000 }, // 8 hours
+// CORS — allow React dev server to call this API
+app.use(cors({
+  origin:      process.env.CLIENT_URL || 'http://localhost:5173',
+  credentials: true,
 }));
 
-// Routes
-app.get('/', (_req, res) => res.redirect('/login'));
-app.use('/', authRoutes);
-app.use('/', dashboardRoutes);
+// Parse JSON and form bodies
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-// TODO: mount projectRoutes when projects CRUD module is built
-// TODO: mount userRoutes when user management module is built
-// TODO: mount materialRoutes when materials module is built
-// TODO: mount scheduleRoutes when scheduling module is built
-// TODO: mount punchRoutes when punch module is built
-// TODO: mount billingRoutes when QBO billing module is built
+// Session auth — TODO: replace with JWT when React frontend is wired up
+app.use(session({
+  secret:            process.env.SESSION_SECRET || 'dev-secret-change-me',
+  resave:            false,
+  saveUninitialized: false,
+  cookie:            { maxAge: 8 * 60 * 60 * 1000 }, // 8 hours
+}));
+
+// API routes
+app.use('/api/auth',      authRoutes);
+app.use('/api',           dashboardRoutes);
+
+// TODO: mount as modules are built
+// app.use('/api/projects',  projectRoutes);
+// app.use('/api/users',     userRoutes);
+// app.use('/api/materials', materialRoutes);
+// app.use('/api/schedule',  scheduleRoutes);
+// app.use('/api/punch',     punchRoutes);
+// app.use('/api/billing',   billingRoutes);
+
+// Global error handler
+app.use((err, _req, res, _next) => {
+  console.error(err);
+  res.status(err.status || 500).json({ error: err.message || 'Server error' });
+});
 
 app.listen(PORT, () => {
-  console.log(`James Blinds MVP running at http://localhost:${PORT}`);
+  console.log(`James Blinds API running at http://localhost:${PORT}`);
 });

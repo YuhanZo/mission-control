@@ -8,7 +8,7 @@ Internal operations system for James Blinds.
 
 ```
 mission-control/
-├── backend/       Node.js + Express API + PostgreSQL
+├── backend/       Node.js + Express REST API + PostgreSQL
 ├── frontend/      React app (coming soon)
 ├── .gitignore
 └── README.md
@@ -18,11 +18,8 @@ mission-control/
 
 ## Prerequisites — Install These First
 
-Before running anything, make sure you have the following installed:
-
 ### 1. Node.js (v18 or higher)
-Download: https://nodejs.org  
-Choose the **LTS** version. After installing, verify:
+Download: https://nodejs.org — choose the **LTS** version.
 ```bash
 node -v
 npm -v
@@ -30,23 +27,18 @@ npm -v
 
 ### 2. PostgreSQL (v14 or higher)
 Download: https://www.postgresql.org/download/windows  
-Click **Download the installer** → pick the latest version → run installer.
+Click **Download the installer** → pick the latest version → run it.
 
 During installation:
-- Set a password for the `postgres` user — **remember this password**
+- Set a password for the `postgres` user — **remember this**
 - Keep the default port **5432** (use 5433 only if 5432 is already taken)
-- When Stack Builder pops up at the end, just close it
+- Close Stack Builder when it appears at the end
 
-After installing, add PostgreSQL to your system PATH:  
-Add `C:\Program Files\PostgreSQL\<version>\bin` to your Environment Variables → Path.  
-Then reopen your terminal.
+Add PostgreSQL to your PATH:  
+Add `C:\Program Files\PostgreSQL\<version>\bin` to Environment Variables → Path, then reopen your terminal.
 
 ### 3. Git
-Download: https://git-scm.com  
-After installing, verify:
-```bash
-git --version
-```
+Download: https://git-scm.com
 
 ---
 
@@ -62,7 +54,6 @@ cd mission-control
 ```bash
 psql -U postgres -c "CREATE DATABASE james_blinds_mvp;"
 ```
-It will ask for your postgres password.
 
 ### Step 3 — Create the tables
 ```bash
@@ -74,11 +65,7 @@ You should see 4 lines of `CREATE TABLE`.
 ```bash
 cp backend/.env.example backend/.env
 ```
-Open `backend/.env` and fill in:
-```
-DB_PASSWORD=your_postgres_password
-```
-Everything else can stay as default unless your PostgreSQL port is not 5432.
+Open `backend/.env` and fill in your `DB_PASSWORD`. If your PostgreSQL runs on port 5433, update `DB_PORT` too.
 
 ### Step 5 — Install dependencies
 ```bash
@@ -90,27 +77,35 @@ npm install
 ```bash
 npm run seed
 ```
-This creates roles, an admin user, and sample projects.
-
 **Default login credentials:**
 - Email: `admin@jamesblinds.com`
 - Password: `password123`
 
-### Step 7 — Start the server
+### Step 7 — Start the API server
 ```bash
 npm run dev
 ```
-Open your browser at: http://localhost:3000
+API running at: http://localhost:3000
 
 ---
 
 ## Running After Initial Setup
 
-Once set up, you only need to run:
 ```bash
 cd backend
 npm run dev
 ```
+
+---
+
+## API Endpoints
+
+| Method | Path               | Auth     | Description                  |
+|--------|--------------------|----------|------------------------------|
+| POST   | `/api/auth/login`  | No       | Login, returns session user  |
+| POST   | `/api/auth/logout` | No       | Destroy session              |
+| GET    | `/api/auth/me`     | Required | Return current session user  |
+| GET    | `/api/dashboard`   | Required | Stats + recent projects      |
 
 ---
 
@@ -125,35 +120,22 @@ backend/
 │   ├── schema.sql          # CREATE TABLE statements (run once)
 │   └── seed.js             # Seed script (run once)
 ├── models/                 # SQL queries — one file per table
-├── controllers/            # Request handling and business logic
-├── routes/                 # Route definitions
+├── controllers/            # Business logic, returns JSON
+├── routes/                 # Route definitions (mounted under /api)
 ├── middleware/
 │   └── authMiddleware.js   # Session-based auth guard
-├── views/                  # HTML templates (MVP — replaced by React later)
-├── public/                 # Static CSS/JS (MVP — replaced by React later)
 ├── .env                    # Your local config — never commit this
 └── .env.example            # Template — safe to commit
 ```
-
-## API Routes
-
-| Method | Path         | Description                    |
-|--------|--------------|--------------------------------|
-| GET    | `/`          | Redirects to `/login`          |
-| GET    | `/login`     | Login page                     |
-| POST   | `/login`     | Authenticate, start session    |
-| GET    | `/logout`    | Destroy session                |
-| GET    | `/dashboard` | Dashboard (requires login)     |
 
 ---
 
 ## Planned Modules
 
-- Projects CRUD + user assignment
-- User management
-- Materials module
-- Scheduling module
-- Punch list module
+- `/api/projects` — project CRUD + user assignment
+- `/api/users` — user management
+- Materials, scheduling, punch list modules
 - QBO billing integration
 - React frontend (replaces EJS views)
+- JWT auth (replaces session when React is ready)
 - AI assistant

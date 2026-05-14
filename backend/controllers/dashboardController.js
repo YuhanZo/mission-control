@@ -1,7 +1,7 @@
 const ProjectModel = require('../models/projectModel');
 
 const dashboardController = {
-  async showDashboard(req, res) {
+  async getDashboard(req, res) {
     try {
       const [totalProjects, activeProjects, recentProjects] = await Promise.all([
         ProjectModel.countAll(),
@@ -9,15 +9,14 @@ const dashboardController = {
         ProjectModel.findRecent(10),
       ]);
 
-      res.render('dashboard', {
+      res.json({
         user: req.session.user,
-        totalProjects,
-        activeProjects,
+        stats: { totalProjects, activeProjects },
         recentProjects,
       });
     } catch (err) {
       console.error('Dashboard error:', err);
-      res.status(500).send('Server error — check your database connection.');
+      res.status(500).json({ error: 'Server error.' });
     }
   },
 };
