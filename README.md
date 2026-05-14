@@ -1,115 +1,110 @@
 # James Blinds — Mission Control
 
-Internal operations system for James Blinds. Manages customers, jobs, quotes, orders, installations, inventory, and staff tasks.
+Internal operations system for James Blinds.
 
----
-
-## Quick Start
-
-### Prerequisites
-- Node.js 18+
-- A [Supabase](https://supabase.com) project (free tier is fine for development)
-
-### 1. Clone and install
-
-```bash
-cd frontend
-npm install
-```
-
-### 2. Configure environment
-
-```bash
-cp ../.env.example .env
-# Edit .env — fill in your Supabase URL and anon key
-```
-
-Find your keys in: **Supabase dashboard → Project Settings → API**
-
-### 3. Run the database migration
-
-In Supabase dashboard → **SQL Editor**, paste and run the contents of:
+## Structure
 
 ```
-supabase/migrations/001_initial_schema.sql
-```
-
-This creates all tables, indexes, triggers, and a seed admin user.
-
-### 4. Start the dev server
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:5173](http://localhost:5173)
-
-> **Note:** The dashboard and all pages work immediately with mock data — no Supabase connection required for the initial UI. Connect Supabase when you're ready to work with real data.
-
----
-
-## Project Structure
-
-```
-├── frontend/           React + TypeScript + Vite app
-│   └── src/
-│       ├── components/ Reusable UI components (layout)
-│       ├── data/       Mock data for local development
-│       ├── lib/        Supabase client singleton
-│       ├── pages/      One component per route
-│       ├── services/   All database operations
-│       ├── styles/     CSS tokens and global utility classes
-│       ├── types/      TypeScript entity types
-│       └── utils/      Formatters and helpers
-├── supabase/
-│   └── migrations/     SQL schema files
-├── docs/
-│   └── architecture.md Full architecture documentation
-├── .env.example        Environment variable template
+mission-control/
+├── backend/       Node.js + Express REST API + PostgreSQL
+├── frontend/      React app (coming soon)
+├── .gitignore
 └── README.md
 ```
 
 ---
 
-## Pages
+## Backend Setup
 
-| Route                | Page                |
-|----------------------|---------------------|
-| `/`                  | Dashboard           |
-| `/customers`         | Customer list       |
-| `/customers/:id`     | Customer detail     |
-| `/jobs`              | Job list            |
-| `/jobs/:id`          | Job detail          |
-| `/quotes`            | Quote list          |
-| `/orders`            | Order list          |
-| `/installations`     | Installation schedule |
-| `/inventory`         | Inventory / stock   |
-| `/tasks`             | Staff task board    |
-| `/settings`          | System settings     |
+### 1. Prerequisites
+
+- Node.js 18+
+- PostgreSQL running locally
+
+### 2. Create the database
+
+```bash
+psql -U postgres -c "CREATE DATABASE james_blinds_mvp;"
+```
+
+### 3. Run the schema
+
+```bash
+psql -U postgres -d james_blinds_mvp -f backend/database/schema.sql
+```
+
+### 4. Configure environment
+
+```bash
+cp backend/.env.example backend/.env
+```
+
+Edit `backend/.env` with your PostgreSQL credentials and a session secret.
+
+### 5. Install dependencies
+
+```bash
+cd backend
+npm install
+```
+
+### 6. Seed the database
+
+```bash
+npm run seed
+```
+
+**Default admin credentials:**
+- Email: `admin@jamesblinds.com`
+- Password: `password123`
+
+### 7. Start the dev server
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## Database
+## Backend Structure
 
-See [`supabase/migrations/001_initial_schema.sql`](supabase/migrations/001_initial_schema.sql) for the full schema with inline comments explaining every design decision.
+```
+backend/
+├── app.js               # Express entry point
+├── config/
+│   └── db.js            # PostgreSQL connection pool
+├── database/
+│   ├── schema.sql       # CREATE TABLE statements
+│   └── seed.js          # Seed script
+├── models/              # SQL queries — one file per table
+├── controllers/         # Request handling and business logic
+├── routes/              # Route definitions
+├── middleware/
+│   └── authMiddleware.js
+├── views/               # EJS templates (MVP only — replaced by React later)
+├── public/              # Static assets (MVP only)
+└── .env.example
+```
 
-Core tables: `customers`, `addresses`, `contacts`, `jobs`, `job_status_history`, `measurements`, `products`, `quotes`, `quote_items`, `orders`, `order_items`, `installations`, `inventory_items`, `staff_users`, `tasks`, `activity_logs`
+## Routes
 
----
+| Method | Path         | Description                    |
+|--------|--------------|--------------------------------|
+| GET    | `/`          | Redirects to `/login`          |
+| GET    | `/login`     | Login page                     |
+| POST   | `/login`     | Authenticate, start session    |
+| GET    | `/logout`    | Destroy session                |
+| GET    | `/dashboard` | Dashboard (requires login)     |
 
-## Architecture
+## Planned Modules
 
-See [`docs/architecture.md`](docs/architecture.md) for the full architecture guide including layering rules, development roadmap, and design rationale.
-
----
-
-## Available Scripts
-
-From the `frontend/` directory:
-
-| Command           | Description                          |
-|-------------------|--------------------------------------|
-| `npm run dev`     | Start dev server at localhost:5173   |
-| `npm run build`   | Production build to `dist/`          |
-| `npm run preview` | Preview production build locally     |
-| `npm run typecheck` | Run TypeScript type checking       |
+- Projects CRUD + user assignment
+- User management
+- Materials module
+- Scheduling module
+- Punch list module
+- QBO billing integration
+- React frontend (replaces EJS views)
+- AI assistant
