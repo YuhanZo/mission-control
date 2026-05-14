@@ -242,7 +242,23 @@ Update an existing project. Send only the fields you want to change.
 
 ---
 
-### POST /api/projects/:id/users 
+### DELETE /api/projects/:id
+
+Delete a project and all its team assignments.
+
+**Success — 200**
+```json
+{ "message": "Project deleted." }
+```
+
+**Error — 404**
+```json
+{ "error": "Project not found." }
+```
+
+---
+
+### POST /api/projects/:id/users
 
 Assign a user to a project with a relationship type.
 
