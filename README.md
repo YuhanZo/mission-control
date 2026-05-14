@@ -1,16 +1,20 @@
-# James Blinds — Mission Control MVP
+# James Blinds — Mission Control
 
-Internal operations system for James Blinds. This MVP slice covers **login** and the **dashboard**.
+Internal operations system for James Blinds.
 
-## Stack
+## Structure
 
-- Node.js + Express
-- PostgreSQL
-- EJS (server-rendered HTML templates)
-- bcrypt (password hashing)
-- express-session (auth sessions)
+```
+mission-control/
+├── backend/       Node.js + Express REST API + PostgreSQL
+├── frontend/      React app (coming soon)
+├── .gitignore
+└── README.md
+```
 
-## Local Setup
+---
+
+## Backend Setup
 
 ### 1. Prerequisites
 
@@ -26,20 +30,21 @@ psql -U postgres -c "CREATE DATABASE james_blinds_mvp;"
 ### 3. Run the schema
 
 ```bash
-psql -U postgres -d james_blinds_mvp -f database/schema.sql
+psql -U postgres -d james_blinds_mvp -f backend/database/schema.sql
 ```
 
 ### 4. Configure environment
 
 ```bash
-cp .env.example .env
+cp backend/.env.example backend/.env
 ```
 
-Edit `.env` and fill in your PostgreSQL credentials and a session secret.
+Edit `backend/.env` with your PostgreSQL credentials and a session secret.
 
 ### 5. Install dependencies
 
 ```bash
+cd backend
 npm install
 ```
 
@@ -48,8 +53,6 @@ npm install
 ```bash
 npm run seed
 ```
-
-This creates roles, an admin user, and sample projects.
 
 **Default admin credentials:**
 - Email: `admin@jamesblinds.com`
@@ -65,41 +68,43 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ---
 
-## Project Structure
+## Backend Structure
 
 ```
-├── app.js               # Express app entry point
+backend/
+├── app.js               # Express entry point
 ├── config/
 │   └── db.js            # PostgreSQL connection pool
 ├── database/
 │   ├── schema.sql       # CREATE TABLE statements
-│   └── seed.js          # Seed script (roles, admin user, sample projects)
+│   └── seed.js          # Seed script
 ├── models/              # SQL queries — one file per table
 ├── controllers/         # Request handling and business logic
 ├── routes/              # Route definitions
 ├── middleware/
-│   └── authMiddleware.js  # Session-based auth guard
-├── views/               # EJS templates rendered as .html
-├── public/css/          # Static styles
-└── .env.example         # Environment variable template
+│   └── authMiddleware.js
+├── views/               # EJS templates (MVP only — replaced by React later)
+├── public/              # Static assets (MVP only)
+└── .env.example
 ```
 
 ## Routes
 
-| Method | Path         | Description                        |
-|--------|--------------|------------------------------------|
-| GET    | `/`          | Redirects to `/login`              |
-| GET    | `/login`     | Login page                         |
-| POST   | `/login`     | Authenticate and start session     |
-| GET    | `/logout`    | Destroy session, redirect to login |
-| GET    | `/dashboard` | Dashboard (requires login)         |
+| Method | Path         | Description                    |
+|--------|--------------|--------------------------------|
+| GET    | `/`          | Redirects to `/login`          |
+| GET    | `/login`     | Login page                     |
+| POST   | `/login`     | Authenticate, start session    |
+| GET    | `/logout`    | Destroy session                |
+| GET    | `/dashboard` | Dashboard (requires login)     |
 
-## Planned Modules (not yet built)
+## Planned Modules
 
-- `/projects` — full project CRUD and user assignment
-- `/users` — user management
+- Projects CRUD + user assignment
+- User management
 - Materials module
 - Scheduling module
 - Punch list module
 - QBO billing integration
+- React frontend (replaces EJS views)
 - AI assistant
