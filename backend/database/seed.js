@@ -33,18 +33,24 @@ const USERS = [
 ];
 
 const COMPANIES = [
-  { name: 'Brookline Builders', state: 'NC', company_type: 'general_contractor', territory: 'CLT' },
-  { name: 'Crescent Property Group', state: 'NC', company_type: 'developer', territory: 'CLT' },
-  { name: 'Lakeside Hospitality Partners', state: 'NC', company_type: 'owner', territory: 'LKN' },
-  { name: 'Palmetto Commercial Interiors', state: 'SC', company_type: 'general_contractor', territory: 'SC' },
-  { name: 'Triad Multifamily Group', state: 'NC', company_type: 'developer', territory: 'TRI' },
+  { name: 'Brookline Builders',           state: 'NC', company_type: 'general_contractor', territory: 'CLT' },
+  { name: 'Crescent Property Group',       state: 'NC', company_type: 'developer',          territory: 'CLT' },
+  { name: 'Lakeside Hospitality Partners', state: 'NC', company_type: 'owner',              territory: 'LKN' },
+  { name: 'Palmetto Commercial Interiors', state: 'SC', company_type: 'general_contractor', territory: 'SC'  },
+  { name: 'Triad Multifamily Group',       state: 'NC', company_type: 'developer',          territory: 'TRI' },
+  { name: 'SouthPark Capital Partners',    state: 'NC', company_type: 'developer',          territory: 'CLT' },
+  { name: 'Greensboro Medical Properties', state: 'NC', company_type: 'owner',              territory: 'TRI' },
+  { name: 'Huntersville Residential',      state: 'NC', company_type: 'developer',          territory: 'LKN' },
 ];
 
 const CONTACTS = [
-  { company: 'Brookline Builders', first_name: 'Jordan', last_name: 'Miles', title: 'Senior PM', email: 'jordan@brookline.example', phone: '704-555-0201', contact_type: 'general_contractor', notes: 'Strong repeat customer. Prefers weekly Friday status updates.' },
-  { company: 'Crescent Property Group', first_name: 'Priya', last_name: 'Shah', title: 'Development Manager', email: 'priya@crescent.example', phone: '704-555-0202', contact_type: 'developer', notes: 'Interested in faster closeout reporting.' },
-  { company: 'Lakeside Hospitality Partners', first_name: 'Elliot', last_name: 'Park', title: 'Owner Rep', email: 'elliot@lakeside.example', phone: '704-555-0203', contact_type: 'owner', notes: 'Budget sensitive; asks for retainage details.' },
-  { company: 'Palmetto Commercial Interiors', first_name: 'Sara', last_name: 'Bennett', title: 'Operations Director', email: 'sara@palmetto.example', phone: '803-555-0204', contact_type: 'general_contractor', notes: 'Often has phased installation schedules.' },
+  { company: 'Brookline Builders',           first_name: 'Jordan',  last_name: 'Miles',    title: 'Senior PM',            email: 'jordan@brookline.example',  phone: '704-555-0201', contact_type: 'general_contractor', notes: 'Strong repeat customer. Prefers weekly Friday status updates.' },
+  { company: 'Crescent Property Group',       first_name: 'Priya',   last_name: 'Shah',     title: 'Development Manager',  email: 'priya@crescent.example',    phone: '704-555-0202', contact_type: 'developer',          notes: 'Interested in faster closeout reporting.' },
+  { company: 'Lakeside Hospitality Partners', first_name: 'Elliot',  last_name: 'Park',     title: 'Owner Rep',            email: 'elliot@lakeside.example',   phone: '704-555-0203', contact_type: 'owner',              notes: 'Budget sensitive; asks for retainage details.' },
+  { company: 'Palmetto Commercial Interiors', first_name: 'Sara',    last_name: 'Bennett',  title: 'Operations Director',  email: 'sara@palmetto.example',     phone: '803-555-0204', contact_type: 'general_contractor', notes: 'Often has phased installation schedules.' },
+  { company: 'SouthPark Capital Partners',    first_name: 'Marcus',  last_name: 'Finley',   title: 'VP of Construction',   email: 'marcus@southpark.example',  phone: '704-555-0205', contact_type: 'developer',          notes: 'Fast-tracks decisions. Prefers concise budget summaries.' },
+  { company: 'Greensboro Medical Properties', first_name: 'Diane',   last_name: 'Okafor',   title: 'Facilities Director',  email: 'diane@gbomed.example',      phone: '336-555-0206', contact_type: 'owner',              notes: 'Strict infection-control scheduling during installs.' },
+  { company: 'Huntersville Residential',      first_name: 'Tyler',   last_name: 'Drummond', title: 'Construction Manager', email: 'tyler@huntersres.example',  phone: '704-555-0207', contact_type: 'developer',          notes: 'Multifamily specialist. Wants unit-by-unit install tracking.' },
 ];
 
 const PROJECTS = [
@@ -145,28 +151,122 @@ const PROJECTS = [
     install_start_date: '2026-07-08',
     install_end_date: '2026-08-22',
   },
+  {
+    job_number: 24007,
+    project_name: 'Huntersville Luxury Apartments',
+    company: 'Huntersville Residential',
+    territory: 'LKN',
+    manager: 'chris.pm@jamesblinds.com',
+    status: 'active',
+    payroll_reporting: true,
+    original_contract: 412000,
+    approved_change_orders: 0,
+    estimated_material_cost: 185400,
+    estimated_labor_cost: 98800,
+    start_date: '2026-05-01',
+    install_start_date: '2026-07-14',
+    install_end_date: '2026-08-28',
+  },
+  {
+    job_number: 24008,
+    project_name: 'Greensboro Medical Complex',
+    company: 'Greensboro Medical Properties',
+    territory: 'TRI',
+    manager: 'chris.pm@jamesblinds.com',
+    status: 'completed',
+    payroll_reporting: true,
+    original_contract: 188000,
+    approved_change_orders: 9500,
+    estimated_material_cost:  84600,
+    estimated_labor_cost:  44900,
+    start_date: '2025-11-01',
+    install_start_date: '2026-01-12',
+    install_end_date: '2026-02-14',
+    completion_date: '2026-02-28',
+  },
+  {
+    job_number: 24009,
+    project_name: 'SouthPark Capital Center',
+    company: 'SouthPark Capital Partners',
+    territory: 'CLT',
+    manager: 'maya.pm@jamesblinds.com',
+    status: 'pending',
+    payroll_reporting: false,
+    original_contract: 145000,
+    approved_change_orders: 0,
+    estimated_material_cost:  65250,
+    estimated_labor_cost:  34750,
+    start_date: '2026-06-01',
+    install_start_date: '2026-08-04',
+    install_end_date: '2026-08-22',
+  },
+  {
+    job_number: 24010,
+    project_name: 'Ballantyne Corporate Park Ph.3',
+    company: 'Brookline Builders',
+    territory: 'CLT',
+    manager: 'maya.pm@jamesblinds.com',
+    status: 'pending',
+    payroll_reporting: false,
+    original_contract: 285000,
+    approved_change_orders: 0,
+    estimated_material_cost: 128250,
+    estimated_labor_cost:  68250,
+    start_date: '2026-07-01',
+    install_start_date: '2026-09-08',
+    install_end_date: '2026-10-03',
+  },
 ];
 
 const CHANGE_ORDERS = [
-  { job_number: 24001, co_number: 'CO-001', description: 'Add motorized conference room shades', amount: 12500, estimated_cost_change: 6100 },
-  { job_number: 24002, co_number: 'CO-001', description: 'Upgrade amenity spaces to blackout fabric', amount: 18500, estimated_cost_change: 8200 },
-  { job_number: 24002, co_number: 'CO-002', description: 'Additional units in building C', amount: 10000, estimated_cost_change: 4400 },
-  { job_number: 24004, co_number: 'CO-001', description: 'Exam room privacy shade revisions', amount: 8400, estimated_cost_change: 3700 },
-  { job_number: 24005, co_number: 'CO-001', description: 'Additional bedroom treatment', amount: 3200, estimated_cost_change: 1450 },
+  { job_number: 24001, co_number: 'CO-001', description: 'Add motorized conference room shades',              amount: 12500, estimated_cost_change: 6100 },
+  { job_number: 24002, co_number: 'CO-001', description: 'Upgrade amenity spaces to blackout fabric',         amount: 18500, estimated_cost_change: 8200 },
+  { job_number: 24002, co_number: 'CO-002', description: 'Additional units in building C',                    amount: 10000, estimated_cost_change: 4400 },
+  { job_number: 24004, co_number: 'CO-001', description: 'Exam room privacy shade revisions',                 amount:  8400, estimated_cost_change: 3700 },
+  { job_number: 24005, co_number: 'CO-001', description: 'Additional bedroom treatment',                      amount:  3200, estimated_cost_change: 1450 },
+  { job_number: 24007, co_number: 'CO-001', description: 'Add solar shades to rooftop amenity level',        amount: 14200, estimated_cost_change: 6400 },
+  { job_number: 24008, co_number: 'CO-001', description: 'Add motorized shades to radiology wing',            amount:  9500, estimated_cost_change: 4275 },
 ];
 
 const MONTHLY_BILLINGS = [
-  { job_number: 24001, billing_month: '2026-05-01', percent_complete: 0.42, previous_billed: 52000, bill_this_month: 31800, accrued_retainage: 4190, invoice_sent: true, qbo_invoice_number: 'INV-24001-05' },
-  { job_number: 24002, billing_month: '2026-05-01', percent_complete: 0.31, previous_billed: 74000, bill_this_month: 31500, accrued_retainage: 5275, invoice_sent: false, qbo_invoice_number: null },
-  { job_number: 24003, billing_month: '2026-05-01', percent_complete: 0.12, previous_billed: 0, bill_this_month: 27210, accrued_retainage: 1360.50, invoice_sent: false, qbo_invoice_number: null },
-  { job_number: 24004, billing_month: '2026-05-01', percent_complete: 0.56, previous_billed: 42800, bill_this_month: 45388, accrued_retainage: 4409.40, invoice_sent: true, qbo_invoice_number: 'INV-24004-05' },
-  { job_number: 24005, billing_month: '2026-02-01', percent_complete: 1.0, previous_billed: 25000, bill_this_month: 5000, accrued_retainage: 1500, invoice_sent: true, qbo_invoice_number: 'INV-24005-FINAL' },
+  // Jan 2026 — 90+ days outstanding (oldest aging bucket)
+  { job_number: 24008, billing_month: '2026-01-01', percent_complete: 0.25, previous_billed:      0, bill_this_month: 49375, accrued_retainage: 2469, invoice_sent: true,  qbo_invoice_number: 'INV-24008-01' },
+  { job_number: 24001, billing_month: '2026-01-01', percent_complete: 0.10, previous_billed:      0, bill_this_month: 19700, accrued_retainage:  985, invoice_sent: true,  qbo_invoice_number: 'INV-24001-01' },
+
+  // Feb 2026 — 61-90 days outstanding
+  { job_number: 24005, billing_month: '2026-02-01', percent_complete:  1.0, previous_billed:  25000, bill_this_month:  5000, accrued_retainage: 1500, invoice_sent: true,  qbo_invoice_number: 'INV-24005-FINAL' },
+  { job_number: 24008, billing_month: '2026-02-01', percent_complete: 0.70, previous_billed:  49375, bill_this_month: 87125, accrued_retainage: 4356, invoice_sent: true,  qbo_invoice_number: 'INV-24008-02' },
+  { job_number: 24002, billing_month: '2026-02-01', percent_complete: 0.09, previous_billed:      0, bill_this_month: 30600, accrued_retainage: 1530, invoice_sent: true,  qbo_invoice_number: 'INV-24002-02' },
+
+  // Mar 2026 — 31-60 days outstanding
+  { job_number: 24001, billing_month: '2026-03-01', percent_complete: 0.22, previous_billed:  19700, bill_this_month: 22220, accrued_retainage: 1111, invoice_sent: true,  qbo_invoice_number: 'INV-24001-03' },
+  { job_number: 24004, billing_month: '2026-03-01', percent_complete: 0.28, previous_billed:      0, bill_this_month: 43792, accrued_retainage: 2190, invoice_sent: true,  qbo_invoice_number: 'INV-24004-03' },
+  { job_number: 24008, billing_month: '2026-03-01', percent_complete: 1.00, previous_billed: 136500, bill_this_month: 61000, accrued_retainage: 3050, invoice_sent: true,  qbo_invoice_number: 'INV-24008-FINAL' },
+
+  // Apr 2026 — current month / 0-30 days
+  { job_number: 24001, billing_month: '2026-04-01', percent_complete: 0.34, previous_billed:  41920, bill_this_month: 22080, accrued_retainage: 1104, invoice_sent: true,  qbo_invoice_number: 'INV-24001-04' },
+  { job_number: 24002, billing_month: '2026-04-01', percent_complete: 0.20, previous_billed:  30600, bill_this_month: 31900, accrued_retainage: 1595, invoice_sent: true,  qbo_invoice_number: 'INV-24002-04' },
+  { job_number: 24006, billing_month: '2026-04-01', percent_complete: 0.08, previous_billed:      0, bill_this_month: 32200, accrued_retainage: 1610, invoice_sent: false, qbo_invoice_number: null },
+
+  // May 2026 — current cycle
+  { job_number: 24001, billing_month: '2026-05-01', percent_complete: 0.42, previous_billed:  64000, bill_this_month: 31800, accrued_retainage: 4190, invoice_sent: true,  qbo_invoice_number: 'INV-24001-05' },
+  { job_number: 24002, billing_month: '2026-05-01', percent_complete: 0.31, previous_billed:  62500, bill_this_month: 31500, accrued_retainage: 5275, invoice_sent: false, qbo_invoice_number: null },
+  { job_number: 24003, billing_month: '2026-05-01', percent_complete: 0.12, previous_billed:      0, bill_this_month: 27210, accrued_retainage: 1361, invoice_sent: false, qbo_invoice_number: null },
+  { job_number: 24004, billing_month: '2026-05-01', percent_complete: 0.56, previous_billed:  43792, bill_this_month: 45388, accrued_retainage: 4409, invoice_sent: true,  qbo_invoice_number: 'INV-24004-05' },
+  { job_number: 24007, billing_month: '2026-05-01', percent_complete: 0.06, previous_billed:      0, bill_this_month: 24720, accrued_retainage: 1236, invoice_sent: false, qbo_invoice_number: null },
 ];
 
 const BIDS = [
-  { company: 'Brookline Builders', territory: 'CLT', project_name: 'South End Retail Shell Shades', bid_date: '2026-05-04', bid_amount: 96500, estimated_gp: 33775, estimated_np: 14475, estimated_hours: 410, bid_status: 'sent', won: false, notes: 'Awaiting GC decision.' },
-  { company: 'Crescent Property Group', territory: 'CLT', project_name: 'Crescent North Phase 2', bid_date: '2026-04-22', bid_amount: 288000, estimated_gp: 100800, estimated_np: 43200, estimated_hours: 1120, bid_status: 'awarded', won: true, notes: 'Expected to convert to project in June.' },
-  { company: 'Palmetto Commercial Interiors', territory: 'SC', project_name: 'Greenville Clinic Fit-Out', bid_date: '2026-05-09', bid_amount: 121400, estimated_gp: 42490, estimated_np: 18210, estimated_hours: 520, bid_status: 'pending', won: false, notes: 'Needs alternate fabric option.' },
+  { company: 'Brookline Builders',           territory: 'CLT', project_name: 'South End Retail Shell Shades',       bid_date: '2026-05-04', bid_amount:  96500, estimated_gp:  33775, estimated_np: 14475, estimated_hours:  410, bid_status: 'sent',     won: false, notes: 'Awaiting GC decision.' },
+  { company: 'Crescent Property Group',       territory: 'CLT', project_name: 'Crescent North Phase 2',             bid_date: '2026-04-22', bid_amount: 288000, estimated_gp: 100800, estimated_np: 43200, estimated_hours: 1120, bid_status: 'awarded',  won: true,  notes: 'Expected to convert to project in June.' },
+  { company: 'Palmetto Commercial Interiors', territory: 'SC',  project_name: 'Greenville Clinic Fit-Out',          bid_date: '2026-05-09', bid_amount: 121400, estimated_gp:  42490, estimated_np: 18210, estimated_hours:  520, bid_status: 'pending',  won: false, notes: 'Needs alternate fabric option.' },
+  { company: 'Triad Multifamily Group',       territory: 'TRI', project_name: 'Greensboro Tech Park Office Shades', bid_date: '2026-04-15', bid_amount: 178500, estimated_gp:  62475, estimated_np: 26775, estimated_hours:  740, bid_status: 'pending',  won: false, notes: 'Decision expected end of May.' },
+  { company: 'Lakeside Hospitality Partners', territory: 'LKN', project_name: 'Lake Norman Corporate Suites',       bid_date: '2026-03-28', bid_amount: 156000, estimated_gp:  54600, estimated_np: 23400, estimated_hours:  650, bid_status: 'awarded',  won: true,  notes: 'Converted to job 24003.' },
+  { company: 'Brookline Builders',           territory: 'CLT', project_name: 'South End Luxury Condos Ph.1',       bid_date: '2026-04-08', bid_amount: 208000, estimated_gp:  72800, estimated_np: 31200, estimated_hours:  880, bid_status: 'sent',     won: false, notes: 'Competing against two other subs.' },
+  { company: 'Palmetto Commercial Interiors', territory: 'SC',  project_name: 'Columbia Office Complex Shades',     bid_date: '2026-03-14', bid_amount:  94500, estimated_gp:  33075, estimated_np: 14175, estimated_hours:  400, bid_status: 'declined', won: false, notes: 'Lost to lower bid. Price was $11K below ours.' },
+  { company: 'SouthPark Capital Partners',    territory: 'CLT', project_name: 'SouthPark Capital Center Fit-Out',   bid_date: '2026-03-20', bid_amount: 145000, estimated_gp:  50750, estimated_np: 21750, estimated_hours:  610, bid_status: 'awarded',  won: true,  notes: 'Converted to job 24009.' },
+  { company: 'Huntersville Residential',      territory: 'LKN', project_name: 'Huntersville Luxury Apartments',     bid_date: '2026-04-01', bid_amount: 412000, estimated_gp: 144200, estimated_np: 61800, estimated_hours: 1680, bid_status: 'awarded',  won: true,  notes: 'Converted to job 24007.' },
+  { company: 'Greensboro Medical Properties', territory: 'TRI', project_name: 'Winston-Salem Outpatient Center',   bid_date: '2026-05-12', bid_amount: 213000, estimated_gp:  74550, estimated_np: 31950, estimated_hours:  890, bid_status: 'sent',     won: false, notes: 'Follow-up after Greensboro Medical success.' },
 ];
 
 const INTERACTIONS = [
@@ -176,9 +276,11 @@ const INTERACTIONS = [
 ];
 
 const MONTHLY_METRICS = [
-  { metric_month: '2026-03-01', number_of_projects: 4, bids_sent: 7, total_bid_value: 812000, total_bid_gp: 284200, total_bid_gp_percent: 0.35, bids_won: 3, total_won_value: 352000, gp_dollars: 123200, gp_percent: 0.35, np_dollars: 52800, np_percent: 0.15, installer_hours: 1520, profit_per_man_hour: 34.74, hit_rate: 0.4286, capture_rate: 0.4335, pipeline_value: 1150000, pipeline_gp: 402500, pipeline_gp_percent: 0.35 },
-  { metric_month: '2026-04-01', number_of_projects: 6, bids_sent: 9, total_bid_value: 1245000, total_bid_gp: 435750, total_bid_gp_percent: 0.35, bids_won: 4, total_won_value: 618000, gp_dollars: 216300, gp_percent: 0.35, np_dollars: 92700, np_percent: 0.15, installer_hours: 2010, profit_per_man_hour: 46.12, hit_rate: 0.4444, capture_rate: 0.4964, pipeline_value: 1498000, pipeline_gp: 524300, pipeline_gp_percent: 0.35 },
-  { metric_month: '2026-05-01', number_of_projects: 6, bids_sent: 8, total_bid_value: 1048000, total_bid_gp: 366800, total_bid_gp_percent: 0.35, bids_won: 2, total_won_value: 409400, gp_dollars: 143290, gp_percent: 0.35, np_dollars: 61410, np_percent: 0.15, installer_hours: 1865, profit_per_man_hour: 32.93, hit_rate: 0.25, capture_rate: 0.3906, pipeline_value: 1307500, pipeline_gp: 457625, pipeline_gp_percent: 0.35 },
+  { metric_month: '2026-01-01', number_of_projects: 3, bids_sent: 4,  total_bid_value:  510000, total_bid_gp: 178500, total_bid_gp_percent: 0.35, bids_won: 2, total_won_value: 210000, gp_dollars:  73500, gp_percent: 0.35, np_dollars:  31500, np_percent: 0.15, installer_hours:  890, profit_per_man_hour: 35.39, hit_rate: 0.5000, capture_rate: 0.4118, pipeline_value:  980000, pipeline_gp: 343000, pipeline_gp_percent: 0.35 },
+  { metric_month: '2026-02-01', number_of_projects: 4, bids_sent: 6,  total_bid_value:  748000, total_bid_gp: 261800, total_bid_gp_percent: 0.35, bids_won: 3, total_won_value: 295000, gp_dollars: 103250, gp_percent: 0.35, np_dollars:  44250, np_percent: 0.15, installer_hours: 1180, profit_per_man_hour: 37.50, hit_rate: 0.5000, capture_rate: 0.3944, pipeline_value: 1080000, pipeline_gp: 378000, pipeline_gp_percent: 0.35 },
+  { metric_month: '2026-03-01', number_of_projects: 5, bids_sent: 7,  total_bid_value:  812000, total_bid_gp: 284200, total_bid_gp_percent: 0.35, bids_won: 3, total_won_value: 352000, gp_dollars: 123200, gp_percent: 0.35, np_dollars:  52800, np_percent: 0.15, installer_hours: 1520, profit_per_man_hour: 34.74, hit_rate: 0.4286, capture_rate: 0.4335, pipeline_value: 1150000, pipeline_gp: 402500, pipeline_gp_percent: 0.35 },
+  { metric_month: '2026-04-01', number_of_projects: 7, bids_sent: 9,  total_bid_value: 1245000, total_bid_gp: 435750, total_bid_gp_percent: 0.35, bids_won: 4, total_won_value: 530000, gp_dollars: 185500, gp_percent: 0.35, np_dollars:  79500, np_percent: 0.15, installer_hours: 2010, profit_per_man_hour: 39.55, hit_rate: 0.4444, capture_rate: 0.4259, pipeline_value: 1498000, pipeline_gp: 524300, pipeline_gp_percent: 0.35 },
+  { metric_month: '2026-05-01', number_of_projects: 8, bids_sent: 5,  total_bid_value:  697000, total_bid_gp: 243950, total_bid_gp_percent: 0.35, bids_won: 2, total_won_value: 409400, gp_dollars: 143290, gp_percent: 0.35, np_dollars:  61410, np_percent: 0.15, installer_hours: 1865, profit_per_man_hour: 32.93, hit_rate: 0.4000, capture_rate: 0.5872, pipeline_value: 1307500, pipeline_gp: 457625, pipeline_gp_percent: 0.35 },
 ];
 
 const WEEKLY_METRICS = [

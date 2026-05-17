@@ -69,17 +69,20 @@ const demoFinance = {
 
 const demoAnalytics = {
   revenueByTerritory: [
-    { territory_name: 'Charlotte Metro', project_count: 3, total_revenue: 567500, est_labor: 141875, est_material: 312625, total_estimate: 454100, est_profit: 113400 },
-    { territory_name: 'Triad',           project_count: 1, total_revenue: 402500, est_labor: 100625, est_material: 221375, total_estimate: 322000, est_profit:  80500 },
-    { territory_name: 'Lake Norman',     project_count: 1, total_revenue: 226750, est_labor:  56688, est_material: 124713, total_estimate: 181400, est_profit:  45350 },
-    { territory_name: 'South Carolina',  project_count: 1, total_revenue: 157300, est_labor:  39325, est_material:  86515, total_estimate: 125840, est_profit:  31460 },
+    { territory_name: 'Charlotte Metro', project_count: 5, total_revenue:  958500, est_labor: 244875, est_material: 505875, total_estimate: 750750, est_profit: 207750 },
+    { territory_name: 'Lake Norman',     project_count: 2, total_revenue:  638750, est_labor: 150000, est_material: 278900, total_estimate: 428900, est_profit: 209850 },
+    { territory_name: 'Triad',           project_count: 2, total_revenue:  600000, est_labor: 140400, est_material: 265600, total_estimate: 406000, est_profit: 194000 },
+    { territory_name: 'South Carolina',  project_count: 1, total_revenue:  157300, est_labor:  39325, est_material:  86515, total_estimate: 125840, est_profit:  31460 },
   ],
   topCustomers: [
-    { company_name: 'Triad Multifamily Group',        territory_name: 'Triad',           project_count: 1, total_revenue: 402500, est_profit:  80500 },
-    { company_name: 'Crescent Property Group',         territory_name: 'Charlotte Metro', project_count: 1, total_revenue: 340500, est_profit:  68100 },
-    { company_name: 'Lakeside Hospitality Partners',   territory_name: 'Lake Norman',     project_count: 1, total_revenue: 226750, est_profit:  45350 },
-    { company_name: 'Brookline Builders',              territory_name: 'Charlotte Metro', project_count: 2, total_revenue: 227000, est_profit:  45400 },
-    { company_name: 'Palmetto Commercial Interiors',   territory_name: 'South Carolina',  project_count: 1, total_revenue: 157300, est_profit:  31460 },
+    { company_name: 'Huntersville Residential',        territory_name: 'Lake Norman',     project_count: 1, total_revenue: 412000, est_profit:  82400 },
+    { company_name: 'Triad Multifamily Group',          territory_name: 'Triad',           project_count: 2, total_revenue: 600000, est_profit: 120000 },
+    { company_name: 'Crescent Property Group',          territory_name: 'Charlotte Metro', project_count: 1, total_revenue: 340500, est_profit:  68100 },
+    { company_name: 'Brookline Builders',               territory_name: 'Charlotte Metro', project_count: 3, total_revenue: 496800, est_profit:  99360 },
+    { company_name: 'SouthPark Capital Partners',       territory_name: 'Charlotte Metro', project_count: 1, total_revenue: 145000, est_profit:  29000 },
+    { company_name: 'Greensboro Medical Properties',    territory_name: 'Triad',           project_count: 1, total_revenue: 197500, est_profit:  39500 },
+    { company_name: 'Lakeside Hospitality Partners',    territory_name: 'Lake Norman',     project_count: 1, total_revenue: 226750, est_profit:  45350 },
+    { company_name: 'Palmetto Commercial Interiors',    territory_name: 'South Carolina',  project_count: 1, total_revenue: 157300, est_profit:  31460 },
   ],
   monthlyRevenue: [
     { metric_month: '2026-01-01', revenue: 210000, gp_dollars:  54600, np_dollars: 21000, pipeline_value:  980000, bid_value: 510000, bids_sent: 4 },
@@ -89,48 +92,90 @@ const demoAnalytics = {
     { metric_month: '2026-05-01', revenue: 287500, gp_dollars:  74750, np_dollars: 28750, pipeline_value: 1154250, bid_value: 285000, bids_sent: 1 },
   ],
   invoices: [
-    { project_id: 1, job_number: 24001, project_name: 'Uptown Medical Office Shades', company_name: 'Brookline Builders',            territory_name: 'Charlotte Metro', billing_month: '2026-05-01', amount_due:  39400, total_billed: 118200, retainage: 11820, invoice_sent: true,  qbo_invoice_number: 'INV-2026-047', days_outstanding:  16 },
-    { project_id: 2, job_number: 24002, project_name: 'Crescent South Apartments',    company_name: 'Crescent Property Group',       territory_name: 'Charlotte Metro', billing_month: '2026-05-01', amount_due:  68100, total_billed:  85125, retainage:  8512, invoice_sent: false, qbo_invoice_number: null,            days_outstanding:  16 },
-    { project_id: 6, job_number: 24006, project_name: 'Triad Multifamily Phase 1',    company_name: 'Triad Multifamily Group',       territory_name: 'Triad',           billing_month: '2026-04-01', amount_due:  80500, total_billed:  80500, retainage:  8050, invoice_sent: false, qbo_invoice_number: null,            days_outstanding:  46 },
-    { project_id: 4, job_number: 24004, project_name: 'Palmetto Surgical Center',     company_name: 'Palmetto Commercial Interiors', territory_name: 'South Carolina',  billing_month: '2026-03-01', amount_due:  31460, total_billed:  94380, retainage:  9438, invoice_sent: true,  qbo_invoice_number: 'INV-2026-038', days_outstanding:  77 },
-    { project_id: 5, job_number: 24005, project_name: 'Riverfront Condo Unit 4B',     company_name: 'Brookline Builders',            territory_name: 'Charlotte Metro', billing_month: '2026-01-01', amount_due:  14500, total_billed:  30000, retainage:  1500, invoice_sent: true,  qbo_invoice_number: 'INV-2026-021', days_outstanding: 136 },
+    // Charlotte Metro — all four aging buckets
+    { project_id: 1,  job_number: 24001, project_name: 'Uptown Medical Office Shades',     company_name: 'Brookline Builders',            territory_name: 'Charlotte Metro', billing_month: '2026-05-01', amount_due:  39400, total_billed: 118200, retainage: 11820, invoice_sent: true,  qbo_invoice_number: 'INV-24001-05',   days_outstanding:  16 },
+    { project_id: 2,  job_number: 24002, project_name: 'Crescent South Apartments',         company_name: 'Crescent Property Group',       territory_name: 'Charlotte Metro', billing_month: '2026-04-01', amount_due:  62500, total_billed:  62500, retainage:  6250, invoice_sent: true,  qbo_invoice_number: 'INV-24002-04',   days_outstanding:  46 },
+    { project_id: 5,  job_number: 24005, project_name: 'Riverfront Condo Unit 4B',          company_name: 'Brookline Builders',            territory_name: 'Charlotte Metro', billing_month: '2026-03-01', amount_due:   5000, total_billed:  30000, retainage:  1500, invoice_sent: true,  qbo_invoice_number: 'INV-24005-FINAL', days_outstanding:  77 },
+    { project_id: 9,  job_number: 24009, project_name: 'SouthPark Capital Center',          company_name: 'SouthPark Capital Partners',    territory_name: 'Charlotte Metro', billing_month: '2026-01-01', amount_due:  19700, total_billed:  19700, retainage:   985, invoice_sent: true,  qbo_invoice_number: 'INV-24009-01',   days_outstanding: 136 },
+    // Lake Norman
+    { project_id: 3,  job_number: 24003, project_name: 'Lake Norman Hotel Renovation',      company_name: 'Lakeside Hospitality Partners', territory_name: 'Lake Norman',     billing_month: '2026-05-01', amount_due:  27210, total_billed:  27210, retainage:  1361, invoice_sent: false, qbo_invoice_number: null,             days_outstanding:  16 },
+    { project_id: 7,  job_number: 24007, project_name: 'Huntersville Luxury Apartments',    company_name: 'Huntersville Residential',      territory_name: 'Lake Norman',     billing_month: '2026-04-01', amount_due:  49440, total_billed:  49440, retainage:  2472, invoice_sent: true,  qbo_invoice_number: 'INV-24007-04',   days_outstanding:  46 },
+    { project_id: 7,  job_number: 24007, project_name: 'Huntersville Luxury Apartments',    company_name: 'Huntersville Residential',      territory_name: 'Lake Norman',     billing_month: '2026-02-01', amount_due:  24720, total_billed:  24720, retainage:  1236, invoice_sent: true,  qbo_invoice_number: 'INV-24007-02',   days_outstanding: 105 },
+    // South Carolina
+    { project_id: 4,  job_number: 24004, project_name: 'Palmetto Surgical Center',           company_name: 'Palmetto Commercial Interiors', territory_name: 'South Carolina',  billing_month: '2026-05-01', amount_due:  45388, total_billed: 139992, retainage:  4409, invoice_sent: true,  qbo_invoice_number: 'INV-24004-05',   days_outstanding:  16 },
+    { project_id: 4,  job_number: 24004, project_name: 'Palmetto Surgical Center',           company_name: 'Palmetto Commercial Interiors', territory_name: 'South Carolina',  billing_month: '2026-03-01', amount_due:  43792, total_billed:  43792, retainage:  2190, invoice_sent: true,  qbo_invoice_number: 'INV-24004-03',   days_outstanding:  77 },
+    { project_id: 4,  job_number: 24004, project_name: 'Palmetto Surgical Center',           company_name: 'Palmetto Commercial Interiors', territory_name: 'South Carolina',  billing_month: '2026-01-01', amount_due:  21000, total_billed:  21000, retainage:  1050, invoice_sent: true,  qbo_invoice_number: 'INV-24004-01',   days_outstanding: 136 },
+    // Triad
+    { project_id: 6,  job_number: 24006, project_name: 'Triad Multifamily Phase 1',          company_name: 'Triad Multifamily Group',       territory_name: 'Triad',           billing_month: '2026-05-01', amount_due:  80500, total_billed:  80500, retainage:  8050, invoice_sent: false, qbo_invoice_number: null,             days_outstanding:  16 },
+    { project_id: 8,  job_number: 24008, project_name: 'Greensboro Medical Complex',         company_name: 'Greensboro Medical Properties', territory_name: 'Triad',           billing_month: '2026-03-01', amount_due:  61000, total_billed: 197500, retainage:  3050, invoice_sent: true,  qbo_invoice_number: 'INV-24008-FINAL', days_outstanding:  77 },
+    { project_id: 8,  job_number: 24008, project_name: 'Greensboro Medical Complex',         company_name: 'Greensboro Medical Properties', territory_name: 'Triad',           billing_month: '2026-02-01', amount_due:  87125, total_billed: 136500, retainage:  4356, invoice_sent: true,  qbo_invoice_number: 'INV-24008-02',   days_outstanding: 105 },
+    { project_id: 8,  job_number: 24008, project_name: 'Greensboro Medical Complex',         company_name: 'Greensboro Medical Properties', territory_name: 'Triad',           billing_month: '2026-01-01', amount_due:  49375, total_billed:  49375, retainage:  2469, invoice_sent: true,  qbo_invoice_number: 'INV-24008-01',   days_outstanding: 136 },
   ],
   expenses: [
-    { project_id: 1, job_number: 24001, project_name: 'Uptown Medical Office Shades', status: 'active',    territory_name: 'Charlotte Metro', pm_name: 'Maya Johnson', contract_value: 197000, est_labor:  49250, est_material: 108350, total_estimate: 157600, actual_cost:  65300 },
-    { project_id: 2, job_number: 24002, project_name: 'Crescent South Apartments',    status: 'active',    territory_name: 'Charlotte Metro', pm_name: 'Maya Johnson', contract_value: 340500, est_labor:  85125, est_material: 187275, total_estimate: 272400, actual_cost:  89400 },
-    { project_id: 3, job_number: 24003, project_name: 'Lake Norman Hotel Renovation', status: 'pending',   territory_name: 'Lake Norman',     pm_name: 'Chris Walker', contract_value: 226750, est_labor:  56688, est_material: 124713, total_estimate: 181400, actual_cost:      0 },
-    { project_id: 4, job_number: 24004, project_name: 'Palmetto Surgical Center',     status: 'active',    territory_name: 'South Carolina',  pm_name: 'Maya Johnson', contract_value: 157300, est_labor:  39325, est_material:  86515, total_estimate: 125840, actual_cost:  68200 },
-    { project_id: 5, job_number: 24005, project_name: 'Riverfront Condo Unit 4B',     status: 'completed', territory_name: 'Charlotte Metro', pm_name: 'Maya Johnson', contract_value:  30000, est_labor:   7500, est_material:  16500, total_estimate:  24000, actual_cost:  23200 },
-    { project_id: 6, job_number: 24006, project_name: 'Triad Multifamily Phase 1',    status: 'active',    territory_name: 'Triad',           pm_name: 'Chris Walker', contract_value: 402500, est_labor: 100625, est_material: 221375, total_estimate: 322000, actual_cost:  44200 },
+    // Charlotte Metro
+    { project_id: 1,  job_number: 24001, project_name: 'Uptown Medical Office Shades',       status: 'active',    territory_name: 'Charlotte Metro', pm_name: 'Maya Johnson',  contract_value: 197000, est_labor:  49250, est_material: 108350, total_estimate: 157600, actual_cost:  65300 },
+    { project_id: 2,  job_number: 24002, project_name: 'Crescent South Apartments',           status: 'active',    territory_name: 'Charlotte Metro', pm_name: 'Maya Johnson',  contract_value: 340500, est_labor:  85125, est_material: 187275, total_estimate: 272400, actual_cost:  89400 },
+    { project_id: 5,  job_number: 24005, project_name: 'Riverfront Condo Unit 4B',            status: 'completed', territory_name: 'Charlotte Metro', pm_name: 'Maya Johnson',  contract_value:  30000, est_labor:   7500, est_material:  16500, total_estimate:  24000, actual_cost:  23200 },
+    { project_id: 9,  job_number: 24009, project_name: 'SouthPark Capital Center',            status: 'pending',   territory_name: 'Charlotte Metro', pm_name: 'Maya Johnson',  contract_value: 145000, est_labor:  34750, est_material:  65250, total_estimate: 100000, actual_cost:      0 },
+    { project_id: 10, job_number: 24010, project_name: 'Ballantyne Corporate Park Ph.3',      status: 'pending',   territory_name: 'Charlotte Metro', pm_name: 'Maya Johnson',  contract_value: 285000, est_labor:  68250, est_material: 128250, total_estimate: 196500, actual_cost:      0 },
+    // Lake Norman
+    { project_id: 3,  job_number: 24003, project_name: 'Lake Norman Hotel Renovation',        status: 'pending',   territory_name: 'Lake Norman',     pm_name: 'Chris Walker', contract_value: 226750, est_labor:  51200, est_material:  93500, total_estimate: 144700, actual_cost:      0 },
+    { project_id: 7,  job_number: 24007, project_name: 'Huntersville Luxury Apartments',      status: 'active',    territory_name: 'Lake Norman',     pm_name: 'Chris Walker', contract_value: 412000, est_labor:  98800, est_material: 185400, total_estimate: 284200, actual_cost:  44100 },
+    // South Carolina
+    { project_id: 4,  job_number: 24004, project_name: 'Palmetto Surgical Center',            status: 'active',    territory_name: 'South Carolina',  pm_name: 'Maya Johnson',  contract_value: 157300, est_labor:  39325, est_material:  86515, total_estimate: 125840, actual_cost:  68200 },
+    // Triad
+    { project_id: 6,  job_number: 24006, project_name: 'Triad Multifamily Phase 1',           status: 'active',    territory_name: 'Triad',           pm_name: 'Chris Walker', contract_value: 402500, est_labor:  95500, est_material: 181000, total_estimate: 276500, actual_cost:  44200 },
+    { project_id: 8,  job_number: 24008, project_name: 'Greensboro Medical Complex',          status: 'completed', territory_name: 'Triad',           pm_name: 'Chris Walker', contract_value: 197500, est_labor:  44900, est_material:  84600, total_estimate: 129500, actual_cost: 128200 },
   ],
   bids: [
-    { id: 1, project_name: 'Ballantyne Corporate Park Ph.3', bid_date: '2026-05-10', bid_amount: 285000, estimated_gp:  74100, estimated_np: 28500, estimated_hours: 540, bid_status: 'pending', won: false, territory_name: 'Charlotte Metro', company_name: 'Brookline Builders',            actual_gp: null },
-    { id: 2, project_name: 'Huntersville Luxury Apartments', bid_date: '2026-05-04', bid_amount: 412000, estimated_gp: 107120, estimated_np: 41200, estimated_hours: 780, bid_status: 'won',     won: true,  territory_name: 'Lake Norman',     company_name: 'Lakeside Hospitality Partners',   actual_gp:  98700 },
-    { id: 3, project_name: 'Cabarrus County Medical',        bid_date: '2026-04-22', bid_amount: 157500, estimated_gp:  40950, estimated_np: 15750, estimated_hours: 298, bid_status: 'lost',    won: false, territory_name: 'Charlotte Metro', company_name: 'Palmetto Commercial Interiors', actual_gp: null },
-    { id: 4, project_name: 'SouthPark Office Tower',         bid_date: '2026-04-15', bid_amount: 320000, estimated_gp:  83200, estimated_np: 32000, estimated_hours: 605, bid_status: 'pending', won: false, territory_name: 'Charlotte Metro', company_name: 'Crescent Property Group',       actual_gp: null },
-    { id: 5, project_name: 'Triad Distribution Center',      bid_date: '2026-04-08', bid_amount: 198000, estimated_gp:  51480, estimated_np: 19800, estimated_hours: 374, bid_status: 'won',     won: true,  territory_name: 'Triad',           company_name: 'Triad Multifamily Group',       actual_gp:  47500 },
-    { id: 6, project_name: 'Uptown Medical Office Shades',   bid_date: '2026-03-15', bid_amount: 197000, estimated_gp:  51220, estimated_np: 19700, estimated_hours: 372, bid_status: 'won',     won: true,  territory_name: 'Charlotte Metro', company_name: 'Brookline Builders',            actual_gp:  39400 },
-    { id: 7, project_name: 'Palmetto Surgical Center',       bid_date: '2026-03-01', bid_amount: 157300, estimated_gp:  40898, estimated_np: 15730, estimated_hours: 297, bid_status: 'won',     won: true,  territory_name: 'South Carolina',  company_name: 'Palmetto Comm. Interiors',      actual_gp:  31460 },
+    // Charlotte Metro
+    { id:  1, project_name: 'Ballantyne Corporate Park Ph.3',    bid_date: '2026-05-10', bid_amount: 285000, estimated_gp:  74100, estimated_np: 28500, estimated_hours: 540, bid_status: 'pending',  won: false, territory_name: 'Charlotte Metro', company_name: 'Brookline Builders',             actual_gp: null  },
+    { id:  3, project_name: 'Cabarrus County Medical',            bid_date: '2026-04-22', bid_amount: 157500, estimated_gp:  40950, estimated_np: 15750, estimated_hours: 298, bid_status: 'lost',     won: false, territory_name: 'Charlotte Metro', company_name: 'Crescent Property Group',        actual_gp: null  },
+    { id:  4, project_name: 'SouthPark Office Tower',             bid_date: '2026-04-15', bid_amount: 320000, estimated_gp:  83200, estimated_np: 32000, estimated_hours: 605, bid_status: 'pending',  won: false, territory_name: 'Charlotte Metro', company_name: 'Crescent Property Group',        actual_gp: null  },
+    { id:  6, project_name: 'Uptown Medical Office Shades',       bid_date: '2026-03-15', bid_amount: 197000, estimated_gp:  51220, estimated_np: 19700, estimated_hours: 372, bid_status: 'awarded',  won: true,  territory_name: 'Charlotte Metro', company_name: 'Brookline Builders',             actual_gp:  39400 },
+    { id:  9, project_name: 'South End Luxury Condos Ph.1',       bid_date: '2026-04-08', bid_amount: 208000, estimated_gp:  54080, estimated_np: 20800, estimated_hours: 393, bid_status: 'sent',     won: false, territory_name: 'Charlotte Metro', company_name: 'Brookline Builders',             actual_gp: null  },
+    { id: 10, project_name: 'SouthPark Capital Center Fit-Out',   bid_date: '2026-03-20', bid_amount: 145000, estimated_gp:  37700, estimated_np: 14500, estimated_hours: 274, bid_status: 'awarded',  won: true,  territory_name: 'Charlotte Metro', company_name: 'SouthPark Capital Partners',     actual_gp:  34800 },
+    // Lake Norman
+    { id:  2, project_name: 'Huntersville Luxury Apartments',     bid_date: '2026-04-01', bid_amount: 412000, estimated_gp: 107120, estimated_np: 41200, estimated_hours: 780, bid_status: 'awarded',  won: true,  territory_name: 'Lake Norman',     company_name: 'Huntersville Residential',       actual_gp:  98700 },
+    { id: 11, project_name: 'Lake Norman Corporate Suites',       bid_date: '2026-03-28', bid_amount: 156000, estimated_gp:  40560, estimated_np: 15600, estimated_hours: 295, bid_status: 'awarded',  won: true,  territory_name: 'Lake Norman',     company_name: 'Lakeside Hospitality Partners',  actual_gp:  38400 },
+    { id: 12, project_name: 'Cornelius Retail Center',            bid_date: '2026-04-30', bid_amount:  88000, estimated_gp:  22880, estimated_np:  8800, estimated_hours: 166, bid_status: 'pending',  won: false, territory_name: 'Lake Norman',     company_name: 'Lakeside Hospitality Partners',  actual_gp: null  },
+    // South Carolina
+    { id:  7, project_name: 'Palmetto Surgical Center',           bid_date: '2026-03-01', bid_amount: 157300, estimated_gp:  40898, estimated_np: 15730, estimated_hours: 297, bid_status: 'awarded',  won: true,  territory_name: 'South Carolina',  company_name: 'Palmetto Commercial Interiors',  actual_gp:  31460 },
+    { id: 13, project_name: 'Columbia Office Complex Shades',     bid_date: '2026-03-14', bid_amount:  94500, estimated_gp:  24570, estimated_np:  9450, estimated_hours: 178, bid_status: 'declined', won: false, territory_name: 'South Carolina',  company_name: 'Palmetto Commercial Interiors',  actual_gp: null  },
+    { id: 14, project_name: 'Greenville Clinic Fit-Out',          bid_date: '2026-05-09', bid_amount: 121400, estimated_gp:  31564, estimated_np: 12140, estimated_hours: 229, bid_status: 'pending',  won: false, territory_name: 'South Carolina',  company_name: 'Palmetto Commercial Interiors',  actual_gp: null  },
+    // Triad
+    { id:  5, project_name: 'Triad Multifamily Phase 1',          bid_date: '2026-04-18', bid_amount: 402500, estimated_gp: 104650, estimated_np: 40250, estimated_hours: 820, bid_status: 'awarded',  won: true,  territory_name: 'Triad',           company_name: 'Triad Multifamily Group',        actual_gp:  96600 },
+    { id: 15, project_name: 'Greensboro Tech Park Office Shades', bid_date: '2026-04-15', bid_amount: 178500, estimated_gp:  46410, estimated_np: 17850, estimated_hours: 337, bid_status: 'pending',  won: false, territory_name: 'Triad',           company_name: 'Triad Multifamily Group',        actual_gp: null  },
+    { id: 16, project_name: 'Winston-Salem Outpatient Center',    bid_date: '2026-05-12', bid_amount: 213000, estimated_gp:  55380, estimated_np: 21300, estimated_hours: 402, bid_status: 'sent',     won: false, territory_name: 'Triad',           company_name: 'Greensboro Medical Properties',  actual_gp: null  },
   ],
   statePerformance: [
-    { territory_name: 'Charlotte Metro', state: 'NC', project_count: 3, total_revenue: 567500, total_cost: 454100, gross_profit: 113400, np_dollars:  56750, labor_cost: 141875, material_cost: 312625, avg_margin: 0.20, tax_rate: 0.0475 },
-    { territory_name: 'Triad',           state: 'NC', project_count: 1, total_revenue: 402500, total_cost: 322000, gross_profit:  80500, np_dollars:  40250, labor_cost: 100625, material_cost: 221375, avg_margin: 0.20, tax_rate: 0.0475 },
-    { territory_name: 'Lake Norman',     state: 'NC', project_count: 1, total_revenue: 226750, total_cost: 181400, gross_profit:  45350, np_dollars:  22675, labor_cost:  56688, material_cost: 124713, avg_margin: 0.20, tax_rate: 0.0475 },
-    { territory_name: 'South Carolina',  state: 'SC', project_count: 1, total_revenue: 157300, total_cost: 125840, gross_profit:  31460, np_dollars:  15730, labor_cost:  39325, material_cost:  86515, avg_margin: 0.20, tax_rate: 0.0600 },
+    { territory_name: 'Charlotte Metro', state: 'NC', project_count: 5, total_revenue:  958500, total_cost: 750500, gross_profit: 208000, np_dollars: 103900, labor_cost: 244875, material_cost: 505625, avg_margin: 0.22, tax_rate: 0.0475 },
+    { territory_name: 'Lake Norman',     state: 'NC', project_count: 2, total_revenue:  638750, total_cost: 428900, gross_profit: 209850, np_dollars:  95800, labor_cost: 150000, material_cost: 278900, avg_margin: 0.33, tax_rate: 0.0475 },
+    { territory_name: 'Triad',           state: 'NC', project_count: 2, total_revenue:  600000, total_cost: 406000, gross_profit: 194000, np_dollars:  90000, labor_cost: 140400, material_cost: 265600, avg_margin: 0.32, tax_rate: 0.0475 },
+    { territory_name: 'South Carolina',  state: 'SC', project_count: 1, total_revenue:  157300, total_cost: 125840, gross_profit:  31460, np_dollars:  15730, labor_cost:  39325, material_cost:  86515, avg_margin: 0.20, tax_rate: 0.0600 },
   ],
   installers: [
-    { id: 1, name: 'Marcus Webb',   territory_name: 'Charlotte Metro', active_projects: 2, ytd_hours: 680, ytd_labor_cost: 34000, projects_completed: 8, avg_hours_per_project:  85, efficiency_rating: 0.94, overtime_hours: 24 },
-    { id: 2, name: 'Devon Clark',   territory_name: 'Charlotte Metro', active_projects: 1, ytd_hours: 540, ytd_labor_cost: 27000, projects_completed: 6, avg_hours_per_project:  90, efficiency_rating: 0.88, overtime_hours: 40 },
-    { id: 3, name: 'Jake Norris',   territory_name: 'Lake Norman',     active_projects: 1, ytd_hours: 420, ytd_labor_cost: 21000, projects_completed: 5, avg_hours_per_project:  84, efficiency_rating: 0.96, overtime_hours:  8 },
-    { id: 4, name: 'Trevor Shaw',   territory_name: 'South Carolina',  active_projects: 1, ytd_hours: 390, ytd_labor_cost: 19500, projects_completed: 4, avg_hours_per_project:  97, efficiency_rating: 0.82, overtime_hours: 56 },
-    { id: 5, name: 'Luis Herrera',  territory_name: 'Triad',           active_projects: 1, ytd_hours: 480, ytd_labor_cost: 24000, projects_completed: 7, avg_hours_per_project:  68, efficiency_rating: 0.97, overtime_hours:  0 },
-    { id: 6, name: 'Ryan Potts',    territory_name: 'Triad',           active_projects: 1, ytd_hours: 310, ytd_labor_cost: 15500, projects_completed: 3, avg_hours_per_project: 103, efficiency_rating: 0.79, overtime_hours: 64 },
+    // Charlotte Metro
+    { id: 1, name: 'Marcus Webb',     territory_name: 'Charlotte Metro', active_projects: 2, ytd_hours: 680, ytd_labor_cost: 34000, projects_completed:  8, avg_hours_per_project:  85, efficiency_rating: 0.94, overtime_hours: 24 },
+    { id: 2, name: 'Devon Clark',     territory_name: 'Charlotte Metro', active_projects: 1, ytd_hours: 540, ytd_labor_cost: 27000, projects_completed:  6, avg_hours_per_project:  90, efficiency_rating: 0.88, overtime_hours: 40 },
+    { id: 7, name: 'Darrell Price',   territory_name: 'Charlotte Metro', active_projects: 2, ytd_hours: 610, ytd_labor_cost: 30500, projects_completed:  7, avg_hours_per_project:  87, efficiency_rating: 0.91, overtime_hours: 32 },
+    // Lake Norman
+    { id: 3, name: 'Jake Norris',     territory_name: 'Lake Norman',     active_projects: 2, ytd_hours: 520, ytd_labor_cost: 26000, projects_completed:  5, avg_hours_per_project:  84, efficiency_rating: 0.96, overtime_hours:  8 },
+    { id: 8, name: 'Carlos Vega',     territory_name: 'Lake Norman',     active_projects: 1, ytd_hours: 380, ytd_labor_cost: 19000, projects_completed:  4, avg_hours_per_project:  95, efficiency_rating: 0.89, overtime_hours: 22 },
+    // South Carolina
+    { id: 4, name: 'Trevor Shaw',     territory_name: 'South Carolina',  active_projects: 1, ytd_hours: 390, ytd_labor_cost: 19500, projects_completed:  4, avg_hours_per_project:  97, efficiency_rating: 0.82, overtime_hours: 56 },
+    { id: 9, name: 'Jermaine Ellis',  territory_name: 'South Carolina',  active_projects: 1, ytd_hours: 330, ytd_labor_cost: 16500, projects_completed:  3, avg_hours_per_project:  83, efficiency_rating: 0.93, overtime_hours: 12 },
+    // Triad
+    { id: 5, name: 'Luis Herrera',    territory_name: 'Triad',           active_projects: 1, ytd_hours: 480, ytd_labor_cost: 24000, projects_completed:  7, avg_hours_per_project:  68, efficiency_rating: 0.97, overtime_hours:  0 },
+    { id: 6, name: 'Ryan Potts',      territory_name: 'Triad',           active_projects: 1, ytd_hours: 310, ytd_labor_cost: 15500, projects_completed:  3, avg_hours_per_project: 103, efficiency_rating: 0.79, overtime_hours: 64 },
+    { id:10, name: 'Anthony Greene',  territory_name: 'Triad',           active_projects: 2, ytd_hours: 570, ytd_labor_cost: 28500, projects_completed:  6, avg_hours_per_project:  95, efficiency_rating: 0.85, overtime_hours: 38 },
   ],
   payrollMonthly: [
-    { metric_month: '2026-01-01', total_hours: 420, total_labor_cost: 21000, overtime_hours: 20, overtime_cost: 1575 },
-    { metric_month: '2026-02-01', total_hours: 680, total_labor_cost: 34000, overtime_hours: 40, overtime_cost: 3000 },
-    { metric_month: '2026-03-01', total_hours: 790, total_labor_cost: 39500, overtime_hours: 60, overtime_cost: 4500 },
-    { metric_month: '2026-04-01', total_hours: 760, total_labor_cost: 38000, overtime_hours: 52, overtime_cost: 3900 },
+    { metric_month: '2026-01-01', total_hours:  420, total_labor_cost: 21000, overtime_hours: 20, overtime_cost:  1575 },
+    { metric_month: '2026-02-01', total_hours:  680, total_labor_cost: 34000, overtime_hours: 40, overtime_cost:  3000 },
+    { metric_month: '2026-03-01', total_hours:  790, total_labor_cost: 39500, overtime_hours: 60, overtime_cost:  4500 },
+    { metric_month: '2026-04-01', total_hours:  760, total_labor_cost: 38000, overtime_hours: 52, overtime_cost:  3900 },
+    { metric_month: '2026-05-01', total_hours:  865, total_labor_cost: 43250, overtime_hours: 48, overtime_cost:  3600 },
   ],
   expenseCategories: [
     { category: 'Materials',         amount: 1072513, pct: 0.55 },
@@ -147,18 +192,18 @@ const demoAnalytics = {
       { month: 'Apr', revenue: 408000, projected: null,   actual: true },
       { month: 'May', revenue: 287500, projected: 287500, actual: true },
       { month: 'Jun', revenue: null,   projected: 420000, actual: false },
-      { month: 'Jul', revenue: null,   projected: 480000, actual: false },
-      { month: 'Aug', revenue: null,   projected: 510000, actual: false },
+      { month: 'Jul', revenue: null,   projected: 510000, actual: false },
+      { month: 'Aug', revenue: null,   projected: 545000, actual: false },
       { month: 'Sep', revenue: null,   projected: 490000, actual: false },
-      { month: 'Oct', revenue: null,   projected: 445000, actual: false },
-      { month: 'Nov', revenue: null,   projected: 398000, actual: false },
-      { month: 'Dec', revenue: null,   projected: 310000, actual: false },
+      { month: 'Oct', revenue: null,   projected: 460000, actual: false },
+      { month: 'Nov', revenue: null,   projected: 415000, actual: false },
+      { month: 'Dec', revenue: null,   projected: 320000, actual: false },
     ],
     cashFlow: [
       { month: 'May', inflow: 287500, outflow: 198500, net:  89000 },
-      { month: 'Jun', inflow: 380000, outflow: 245000, net: 135000 },
-      { month: 'Jul', inflow: 455000, outflow: 290000, net: 165000 },
-      { month: 'Aug', inflow: 510000, outflow: 315000, net: 195000 },
+      { month: 'Jun', inflow: 395000, outflow: 258000, net: 137000 },
+      { month: 'Jul', inflow: 472000, outflow: 298000, net: 174000 },
+      { month: 'Aug', inflow: 545000, outflow: 340000, net: 205000 },
     ],
     upcomingBilling: [
       { project_name: 'Crescent South Apartments',       amount:  68100, due_date: '2026-05-25', status: 'pending' },
@@ -170,6 +215,24 @@ const demoAnalytics = {
   },
 };
 
+const TERRITORY_NAMES = { 1: 'Charlotte Metro', 2: 'Lake Norman', 3: 'South Carolina', 4: 'Triad' };
+
+function filterAnalytics(data, areaId) {
+  if (!areaId) return data;
+  const name = TERRITORY_NAMES[areaId];
+  if (!name) return data;
+  return {
+    ...data,
+    revenueByTerritory: (data.revenueByTerritory || []).filter((t) => t.territory_name === name),
+    topCustomers:       (data.topCustomers || []).filter((c) => c.territory_name === name),
+    invoices:           (data.invoices || []).filter((i) => i.territory_name === name),
+    expenses:           (data.expenses || []).filter((e) => e.territory_name === name),
+    bids:               (data.bids || []).filter((b) => b.territory_name === name),
+    statePerformance:   (data.statePerformance || []).filter((s) => s.territory_name === name),
+    installers:         (data.installers || []).filter((i) => i.territory_name === name),
+  };
+}
+
 const statusLabels = {
   active: 'Active',
   pending: 'Pending',
@@ -180,6 +243,17 @@ const statusLabels = {
 
 function currency(value) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(value || 0));
+}
+
+function formatRole(role) {
+  if (!role) return 'Finance';
+  return role.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
+function initials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  return parts.length >= 2 ? parts[0][0] + parts[parts.length - 1][0] : parts[0].slice(0, 2).toUpperCase();
 }
 
 function projectContractValue(project) {
@@ -1718,7 +1792,8 @@ function ProjectManagerDashboard({ user }) {
   const [analytics, setAnalytics] = useState(null);
   const [loadingApi, setLoadingApi] = useState(false);
   const dashboard = normalizeDashboard(apiDashboard, areaId);
-  const analyticsData = analytics || demoAnalytics;
+  const analyticsData = analytics ? { ...demoAnalytics, ...analytics } : demoAnalytics;
+  const filteredAnalytics = filterAnalytics(analyticsData, areaId);
 
   async function refreshFromApi() {
     setLoadingApi(true);
@@ -1758,9 +1833,12 @@ function ProjectManagerDashboard({ user }) {
           </div>
         ))}
         <div className="user-card">
-          <strong>{user.name}</strong>
-          <span>{user.role?.replace('_', ' ') || 'finance'}</span>
-          {!analytics && !loadingApi && <span style={{ fontSize: 10, color: 'rgba(255,255,255,.45)', marginTop: 4, display: 'block' }}>Demo data</span>}
+          <div className="user-avatar">{initials(user.name)}</div>
+          <div className="user-info">
+            <strong>{user.name}</strong>
+            <span>{formatRole(user.role)}</span>
+            {!analytics && !loadingApi && <span style={{ fontSize: 10, opacity: .5 }}>Demo data</span>}
+          </div>
         </div>
       </aside>
 
@@ -1779,17 +1857,17 @@ function ProjectManagerDashboard({ user }) {
           </div>
         </header>
 
-        {activeView === 'dashboard'   && <DashboardHome dashboard={dashboard} />}
-        {activeView === 'revenue'     && <RevenueView analytics={analyticsData} />}
-        {activeView === 'bids'        && <BidsAnalyticsView analytics={analyticsData} />}
-        {activeView === 'invoices'    && <InvoicesView analytics={analyticsData} />}
-        {activeView === 'expenses'    && <ExpensesView analytics={analyticsData} />}
-        {activeView === 'payroll'     && <PayrollAnalyticsView analytics={analyticsData} />}
-        {activeView === 'states'      && <StateAnalyticsView analytics={analyticsData} />}
-        {activeView === 'forecasting' && <ForecastingView analytics={analyticsData} dashboard={dashboard} />}
-        {activeView === 'projects'    && <ProjectTable projects={dashboard.projects || []} />}
-        {activeView === 'calendar'    && <CalendarView projects={dashboard.projects || []} />}
-        {activeView === 'reports'     && <ReportsView />}
+        {activeView === 'dashboard'   && <DashboardHome key={areaId} dashboard={dashboard} />}
+        {activeView === 'revenue'     && <RevenueView key={areaId} analytics={filteredAnalytics} />}
+        {activeView === 'bids'        && <BidsAnalyticsView key={areaId} analytics={filteredAnalytics} />}
+        {activeView === 'invoices'    && <InvoicesView key={areaId} analytics={filteredAnalytics} />}
+        {activeView === 'expenses'    && <ExpensesView key={areaId} analytics={filteredAnalytics} />}
+        {activeView === 'payroll'     && <PayrollAnalyticsView key={areaId} analytics={filteredAnalytics} />}
+        {activeView === 'states'      && <StateAnalyticsView key={areaId} analytics={filteredAnalytics} />}
+        {activeView === 'forecasting' && <ForecastingView key={areaId} analytics={filteredAnalytics} dashboard={dashboard} />}
+        {activeView === 'projects'    && <ProjectTable key={areaId} projects={dashboard.projects || []} />}
+        {activeView === 'calendar'    && <CalendarView key={areaId} projects={dashboard.projects || []} />}
+        {activeView === 'reports'     && <ReportsView key={areaId} />}
       </main>
     </div>
   );
