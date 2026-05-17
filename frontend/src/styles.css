@@ -740,13 +740,126 @@ td small {
   background: var(--brand);
 }
 
+/* ─── Finance dashboard enhancements ─────────────────────────── */
+
+.fin-tab-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  flex-wrap: wrap;
+}
+
+.fin-tab {
+  background: transparent;
+  color: var(--muted);
+  border-radius: 7px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.fin-tab:hover {
+  background: #eef3f6;
+  color: var(--ink);
+}
+
+.fin-tab-active {
+  background: var(--brand) !important;
+  color: #fff !important;
+}
+
+.fin-loading {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: .05em;
+}
+
+.fin-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.fin-kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+  border-left: 4px solid var(--kpi-color, var(--brand));
+  box-shadow: 0 1px 3px rgba(23, 32, 42, .06);
+}
+
+.fin-kpi-card span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.fin-kpi-card strong {
+  display: block;
+  font-size: 22px;
+  color: var(--kpi-color, var(--ink));
+}
+
+.fin-kpi-card small {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.fin-chart-wide {
+  grid-column: 1 / -1;
+}
+
+.fin-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.fin-panel-head h2 {
+  margin: 0;
+  font-size: 15px;
+  white-space: nowrap;
+}
+
+.fin-progress-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: #e8edf0;
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.fin-progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width .3s ease;
+}
+
 @media (max-width: 1050px) {
   .stats-grid,
   .content-grid,
   .charts-grid,
   .calendar-layout,
   .pacing-grid,
-  .finance-bottom-grid {
+  .finance-bottom-grid,
+  .fin-kpi-grid {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -763,7 +876,8 @@ td small {
   .charts-grid,
   .calendar-layout,
   .pacing-grid,
-  .finance-bottom-grid {
+  .finance-bottom-grid,
+  .fin-kpi-grid {
     grid-template-columns: 1fr;
   }
 
