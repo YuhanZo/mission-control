@@ -548,6 +548,55 @@ const demoInstallers = [
   { id:10, name: 'Anthony Greene', territory_name: 'Triad',           current_job: 'Greensboro Medical Complex',     ytd_hours: 570, efficiency_rating: 0.85, overtime_hours: 38, status: 'wrap-up'  },
 ];
 
+const installerJobHistory = {
+  1:  [
+    { job: 'Uptown Medical Office Shades',      role: 'Lead Installer', start: '2026-04-28', end: null,         hours: 180, status: 'active'    },
+    { job: 'Riverfront Condo Unit 4B',           role: 'Lead Installer', start: '2026-01-28', end: '2026-02-12', hours:  64, status: 'completed' },
+    { job: 'South End Retail Pilot',             role: 'Lead Installer', start: '2025-11-10', end: '2025-12-04', hours: 112, status: 'completed' },
+  ],
+  2:  [
+    { job: 'Crescent South Apartments',          role: 'Installer',      start: '2026-04-15', end: null,         hours: 210, status: 'active'    },
+    { job: 'Uptown Medical Office Shades',       role: 'Installer',      start: '2026-03-01', end: '2026-04-14', hours: 148, status: 'completed' },
+    { job: 'Ballantyne Office Complex',          role: 'Installer',      start: '2026-01-06', end: '2026-02-18', hours: 120, status: 'completed' },
+  ],
+  3:  [
+    { job: 'Huntersville Luxury Apartments',     role: 'Lead Installer', start: '2026-04-07', end: null,         hours: 190, status: 'active'    },
+    { job: 'Lake Norman Hotel Pre-Renovation',   role: 'Installer',      start: '2026-01-15', end: '2026-02-28', hours: 144, status: 'completed' },
+  ],
+  4:  [
+    { job: 'Palmetto Surgical Center',           role: 'Lead Installer', start: '2026-04-22', end: null,         hours: 156, status: 'active'    },
+    { job: 'Columbia Office Complex Shades',     role: 'Installer',      start: '2026-02-10', end: '2026-03-15', hours: 138, status: 'completed' },
+    { job: 'Greenville Clinic Phase 1',          role: 'Lead Installer', start: '2025-10-14', end: '2025-11-30', hours:  96, status: 'completed' },
+  ],
+  5:  [
+    { job: 'Triad Multifamily Phase 1',          role: 'Lead Installer', start: '2026-04-01', end: null,         hours: 195, status: 'active'    },
+    { job: 'Greensboro Medical Complex Ph.1',    role: 'Installer',      start: '2026-01-12', end: '2026-03-20', hours: 185, status: 'completed' },
+    { job: 'Winston-Salem Office Suite',         role: 'Lead Installer', start: '2025-09-08', end: '2025-10-31', hours: 100, status: 'completed' },
+  ],
+  6:  [
+    { job: 'Triad Multifamily Phase 1',          role: 'Installer',      start: '2026-04-01', end: null,         hours: 140, status: 'active'    },
+    { job: 'Greensboro Tech Park Phase 1',       role: 'Installer',      start: '2026-02-01', end: '2026-03-15', hours: 104, status: 'completed' },
+  ],
+  7:  [
+    { job: 'Ballantyne Corporate Park Ph.3',     role: 'Lead Installer', start: '2026-05-01', end: null,         hours:  95, status: 'active'    },
+    { job: 'Crescent South Apartments',          role: 'Installer',      start: '2026-03-10', end: '2026-04-30', hours: 210, status: 'completed' },
+    { job: 'Midtown Office Shades',              role: 'Installer',      start: '2026-01-05', end: '2026-02-28', hours: 162, status: 'completed' },
+  ],
+  8:  [
+    { job: 'Lake Norman Hotel Renovation',       role: 'Installer',      start: '2026-05-05', end: null,         hours:  68, status: 'active'    },
+    { job: 'Cornelius Retail Build-Out',         role: 'Lead Installer', start: '2026-02-15', end: '2026-03-28', hours: 168, status: 'completed' },
+  ],
+  9:  [
+    { job: 'Palmetto Surgical Center',           role: 'Installer',      start: '2026-04-22', end: null,         hours: 138, status: 'active'    },
+    { job: 'Charleston Corporate Suites',        role: 'Installer',      start: '2026-01-20', end: '2026-03-10', hours: 124, status: 'completed' },
+  ],
+  10: [
+    { job: 'Greensboro Medical Complex',         role: 'Lead Installer', start: '2026-04-14', end: null,         hours: 225, status: 'active'    },
+    { job: 'Triad Multifamily Phase 1',          role: 'Installer',      start: '2026-01-12', end: '2026-04-01', hours: 205, status: 'completed' },
+    { job: 'Winston-Salem Outpatient Pilot',     role: 'Installer',      start: '2025-11-03', end: '2025-12-20', hours:  96, status: 'completed' },
+  ],
+};
+
 const demoBids = [
   { id: 1, project_name: 'South End Retail Shell Shades',       company_name: 'Brookline Builders',            territory_name: 'Charlotte Metro', bid_date: '2026-05-04', bid_amount:  96500, estimated_gp: 33775, estimated_hours:  410, bid_status: 'sent',     won: false },
   { id: 2, project_name: 'Crescent North Phase 2',              company_name: 'Crescent Property Group',       territory_name: 'Charlotte Metro', bid_date: '2026-04-22', bid_amount: 288000, estimated_gp:100800, estimated_hours: 1120, bid_status: 'awarded',  won: true  },
@@ -606,30 +655,91 @@ function PlaceholderView({ title, icon, description }) {
 
 // ─── PM Views ──────────────────────────────────────────────────────────────
 
+function InstallerProfile({ installer, onClose }) {
+  const history  = installerJobHistory[installer.id] || [];
+  const effColor = (v) => v >= 0.9 ? 'var(--green)' : v >= 0.8 ? 'var(--orange)' : 'var(--red)';
+  const col      = effColor(installer.efficiency_rating);
+  function initials(name) {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/);
+    return parts.length >= 2 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0].slice(0, 2).toUpperCase();
+  }
+  return (
+    <div className="detail-overlay" onClick={onClose}>
+      <div className="detail-panel" onClick={(e) => e.stopPropagation()}>
+        <div className="detail-header">
+          <div className="detail-avatar">{initials(installer.name)}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2 style={{ margin: '0 0 6px', fontSize: 20 }}>{installer.name}</h2>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              <span className="badge badge-active">{installer.territory_name}</span>
+              <span className={`badge badge-${installer.status === 'on-site' ? 'active' : installer.status === 'pending' ? 'pending' : 'completed'}`}>{installer.status}</span>
+            </div>
+          </div>
+          <button onClick={onClose} type="button" className="close-btn">✕</button>
+        </div>
+
+        <div className="detail-stats">
+          <div className="stat"><span>YTD Hours</span><strong>{installer.ytd_hours}h</strong><small>Field hours logged</small></div>
+          <div className="stat"><span>Efficiency</span><strong style={{ color: col }}>{formatRatio(installer.efficiency_rating)}</strong><small>Performance rating</small></div>
+          <div className="stat"><span>OT Hours</span><strong style={{ color: installer.overtime_hours > 40 ? 'var(--red)' : 'inherit' }}>{installer.overtime_hours}h</strong><small>{installer.overtime_hours > 40 ? 'High — review needed' : 'Within normal range'}</small></div>
+        </div>
+
+        <div className="detail-body">
+          <div className="detail-section-label">Current Assignment</div>
+          <div className="detail-job-chip">{installer.current_job || 'Unassigned'}</div>
+
+          {history.length > 0 && (
+            <>
+              <div className="detail-section-label" style={{ marginTop: 22 }}>Job History</div>
+              <table>
+                <thead>
+                  <tr><th>Project</th><th>Role</th><th>Dates</th><th>Hrs</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  {history.map((job, i) => (
+                    <tr key={i}>
+                      <td><strong style={{ fontSize: 13 }}>{job.job}</strong></td>
+                      <td style={{ fontSize: 12 }}>{job.role}</td>
+                      <td><small>{shortDate(job.start)}{job.end ? ` – ${shortDate(job.end)}` : ' – Present'}</small></td>
+                      <td>{job.hours}h</td>
+                      <td><span className={`badge badge-${job.status === 'active' ? 'active' : 'completed'}`}>{job.status}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function InstallersView({ installers }) {
-  const onSite  = installers.filter((i) => i.status === 'on-site').length;
-  const totalHrs = installers.reduce((s, i) => s + i.ytd_hours, 0);
-  const avgEff  = installers.length ? installers.reduce((s, i) => s + i.efficiency_rating, 0) / installers.length : 0;
-  const highOT  = installers.filter((i) => i.overtime_hours > 40).length;
+  const [selected, setSelected] = useState(null);
+  const onSite   = installers.filter((i) => i.status === 'on-site').length;
+  const avgEff   = installers.length ? installers.reduce((s, i) => s + i.efficiency_rating, 0) / installers.length : 0;
+  const highOT   = installers.filter((i) => i.overtime_hours > 40).length;
   const effColor = (v) => v >= 0.9 ? 'var(--green)' : v >= 0.8 ? 'var(--orange)' : 'var(--red)';
 
   return (
     <>
       <section className="stats-grid" style={{ gridTemplateColumns: 'repeat(4,minmax(0,1fr))' }}>
-        <StatCard label="Total Installers"   value={installers.length} note="In selected area" />
-        <StatCard label="Currently On-Site"  value={onSite}            note={`${installers.length - onSite} staging or pending`} />
+        <StatCard label="Total Installers"   value={installers.length}   note="In selected area" />
+        <StatCard label="Currently On-Site"  value={onSite}              note={`${installers.length - onSite} staging or pending`} />
         <StatCard label="Avg Efficiency"     value={formatRatio(avgEff)} note="YTD performance rating" />
-        <StatCard label="High OT Alert"      value={highOT}            note="Installers > 40 OT hrs" />
+        <StatCard label="High OT Alert"      value={highOT}              note="Installers > 40 OT hrs" />
       </section>
       <section className="panel">
-        <div className="panel-head"><h2>Installer Roster</h2><span>{installers.length} field technicians</span></div>
+        <div className="panel-head"><h2>Installer Roster</h2><span>{installers.length} field technicians · click a row to view profile</span></div>
         <table>
           <thead><tr><th>Installer</th><th>Territory</th><th>Current Assignment</th><th>Status</th><th>YTD Hours</th><th>Efficiency</th><th>OT Hours</th></tr></thead>
           <tbody>
             {installers.map((inst) => {
               const col = effColor(inst.efficiency_rating);
               return (
-                <tr key={inst.id}>
+                <tr key={inst.id} className="hoverable-row" onClick={() => setSelected(inst)}>
                   <td><strong>{inst.name}</strong></td>
                   <td>{inst.territory_name}</td>
                   <td>{inst.current_job || '—'}</td>
@@ -650,6 +760,7 @@ function InstallersView({ installers }) {
           </tbody>
         </table>
       </section>
+      {selected && <InstallerProfile installer={selected} onClose={() => setSelected(null)} />}
     </>
   );
 }
@@ -871,7 +982,8 @@ function ReportsView() {
 
 function ProjectManagerDashboard({ user }) {
   const [activeView, setActiveView] = useState('dashboard');
-  const [areaId, setAreaId] = useState(user.territoryId || 0);
+  const lockedArea = user.territoryId ? Number(user.territoryId) : 0;
+  const [areaId, setAreaId] = useState(lockedArea || 0);
   const [apiDashboard, setApiDashboard] = useState(null);
   const [loadingApi, setLoadingApi] = useState(false);
   const dashboard = normalizeDashboard(apiDashboard, areaId);
@@ -950,13 +1062,19 @@ function ProjectManagerDashboard({ user }) {
         <header className="page-head">
           <div><p>{getAreaName(areaId)}</p><h1>{currentLabel}</h1></div>
           <div className="actions">
-            <select value={areaId} onChange={(e) => setAreaId(Number(e.target.value))}>
-              <option value="0">All areas</option>
-              <option value="1">Charlotte Metro</option>
-              <option value="2">Lake Norman</option>
-              <option value="3">South Carolina</option>
-              <option value="4">Triad</option>
-            </select>
+            {lockedArea ? (
+              <div style={{ padding: '10px 14px', background: '#eef3f6', borderRadius: 6, color: 'var(--brand)', fontWeight: 700, fontSize: 14, border: '1px solid var(--line)', whiteSpace: 'nowrap' }}>
+                {territoryNames[lockedArea]}
+              </div>
+            ) : (
+              <select value={areaId} onChange={(e) => setAreaId(Number(e.target.value))}>
+                <option value="0">All areas</option>
+                <option value="1">Charlotte Metro</option>
+                <option value="2">Lake Norman</option>
+                <option value="3">South Carolina</option>
+                <option value="4">Triad</option>
+              </select>
+            )}
             <button onClick={refreshFromApi} type="button">{loadingApi ? 'Refreshing...' : 'Refresh Data'}</button>
           </div>
         </header>
