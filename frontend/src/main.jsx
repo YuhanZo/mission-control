@@ -418,9 +418,17 @@ function LoginScreen({ onLogin }) {
       if (!response.ok) throw new Error(body.error || 'Unable to log in.');
       onLogin(body.user);
     } catch (err) {
-      const isEst = /\.est[@.]|estimat/i.test(email);
+      const isChief = /chief|chiefest|chief_est/i.test(email);
+      const isEst   = !isChief && /\.est[@.]|estimat/i.test(email);
       setError(`${err.message} Showing demo data.`);
-      onLogin({ id: 'demo', name: isEst ? 'Alex Chen' : 'Maya Johnson', email, role: isEst ? 'estimator' : 'project_manager', territoryId: 1, demo: true });
+      onLogin({
+        id: 'demo',
+        name: isChief ? 'Sarah Mitchell' : isEst ? 'Alex Chen' : 'Maya Johnson',
+        email,
+        role: isChief ? 'chief_estimator' : isEst ? 'estimator' : 'project_manager',
+        territoryId: isChief ? 0 : 1,
+        demo: true,
+      });
     } finally {
       setLoading(false);
     }
@@ -440,7 +448,7 @@ function LoginScreen({ onLogin }) {
           Email
           <input value={email} onChange={(event) => setEmail(event.target.value)} />
           <small style={{ color: 'var(--muted)', fontWeight: 400, marginTop: 4, display: 'block' }}>
-            Demo: <code>maya.pm@jamesblinds.com</code> · PM &nbsp;|&nbsp; <code>alex.est@jamesblinds.com</code> · Estimator
+            Demo: <code>maya.pm@jamesblinds.com</code> · PM &nbsp;|&nbsp; <code>alex.est@jamesblinds.com</code> · Estimator &nbsp;|&nbsp; <code>sarah.chiefest@jamesblinds.com</code> · Chief Est.
           </small>
         </label>
         <label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
@@ -792,6 +800,93 @@ const demoScopeItems = [
       { name: 'Master Bedrooms',     windows:  60, width_avg: 48, height_avg: 72, product: 'Blackout Liner Shade'   },
     ],
   },
+];
+
+// ─── Chief Estimator demo data ─────────────────────────────────────────────
+
+const demoEstimators = [
+  { id: 1, name: 'Alex Chen',     territory_name: 'Charlotte Metro', territory_id: 1, email: 'alex.chen@jamesblinds.com',  phone: '704-555-0301', hire_date: '2023-02-14', ytd_quotes: 35, ytd_won: 17, win_rate: 0.486, total_bid: 5350000, captured: 2645000, avg_margin: 0.342, avg_turnaround: 7.2, active_estimates: 5, pipeline_value: 1268500 },
+  { id: 2, name: 'Jordan Rivers', territory_name: 'Lake Norman',     territory_id: 2, email: 'jordan.r@jamesblinds.com',   phone: '704-555-0302', hire_date: '2022-08-01', ytd_quotes: 28, ytd_won: 15, win_rate: 0.536, total_bid: 4120000, captured: 2280000, avg_margin: 0.351, avg_turnaround: 6.8, active_estimates: 4, pipeline_value:  912000 },
+  { id: 3, name: 'Taylor Brooks', territory_name: 'South Carolina',  territory_id: 3, email: 'taylor.b@jamesblinds.com',   phone: '803-555-0303', hire_date: '2024-01-10', ytd_quotes: 22, ytd_won:  9, win_rate: 0.409, total_bid: 3280000, captured: 1340000, avg_margin: 0.328, avg_turnaround: 9.1, active_estimates: 3, pipeline_value:  755000 },
+  { id: 4, name: 'Morgan Lee',    territory_name: 'Triad',           territory_id: 4, email: 'morgan.l@jamesblinds.com',   phone: '336-555-0304', hire_date: '2023-07-22', ytd_quotes: 31, ytd_won: 16, win_rate: 0.516, total_bid: 4890000, captured: 2620000, avg_margin: 0.345, avg_turnaround: 7.8, active_estimates: 6, pipeline_value: 1145000 },
+];
+
+const demoEstimatorMonthlyData = {
+  1: demoEstimatorMonthly,
+  2: [
+    { month: '2026-01-01', quotes_sent: 5, quotes_won: 3, win_rate: 0.600, total_bid_value:  780000, captured_value: 468000, avg_margin: 0.348, avg_quote_size: 156000, avg_turnaround_days: 7.5 },
+    { month: '2026-02-01', quotes_sent: 6, quotes_won: 3, win_rate: 0.500, total_bid_value:  845000, captured_value: 402000, avg_margin: 0.352, avg_quote_size: 140833, avg_turnaround_days: 7.0 },
+    { month: '2026-03-01', quotes_sent: 5, quotes_won: 3, win_rate: 0.600, total_bid_value:  930000, captured_value: 558000, avg_margin: 0.355, avg_quote_size: 186000, avg_turnaround_days: 6.5 },
+    { month: '2026-04-01', quotes_sent: 7, quotes_won: 4, win_rate: 0.571, total_bid_value: 1100000, captured_value: 628000, avg_margin: 0.349, avg_quote_size: 157143, avg_turnaround_days: 6.8 },
+    { month: '2026-05-01', quotes_sent: 5, quotes_won: 2, win_rate: 0.400, total_bid_value:  465000, captured_value: 224000, avg_margin: 0.351, avg_quote_size:  93000, avg_turnaround_days: 6.8 },
+  ],
+  3: [
+    { month: '2026-01-01', quotes_sent: 4, quotes_won: 2, win_rate: 0.500, total_bid_value: 620000, captured_value: 298000, avg_margin: 0.324, avg_quote_size: 155000, avg_turnaround_days:  9.8 },
+    { month: '2026-02-01', quotes_sent: 4, quotes_won: 1, win_rate: 0.250, total_bid_value: 580000, captured_value: 142000, avg_margin: 0.320, avg_quote_size: 145000, avg_turnaround_days: 10.2 },
+    { month: '2026-03-01', quotes_sent: 5, quotes_won: 2, win_rate: 0.400, total_bid_value: 710000, captured_value: 298000, avg_margin: 0.331, avg_quote_size: 142000, avg_turnaround_days:  9.0 },
+    { month: '2026-04-01', quotes_sent: 5, quotes_won: 3, win_rate: 0.600, total_bid_value: 890000, captured_value: 432000, avg_margin: 0.328, avg_quote_size: 178000, avg_turnaround_days:  8.8 },
+    { month: '2026-05-01', quotes_sent: 4, quotes_won: 1, win_rate: 0.250, total_bid_value: 480000, captured_value: 170000, avg_margin: 0.330, avg_quote_size: 120000, avg_turnaround_days:  8.2 },
+  ],
+  4: [
+    { month: '2026-01-01', quotes_sent: 6, quotes_won: 3, win_rate: 0.500, total_bid_value:  920000, captured_value: 478000, avg_margin: 0.340, avg_quote_size: 153333, avg_turnaround_days: 8.2 },
+    { month: '2026-02-01', quotes_sent: 6, quotes_won: 3, win_rate: 0.500, total_bid_value:  985000, captured_value: 512000, avg_margin: 0.343, avg_quote_size: 164167, avg_turnaround_days: 7.8 },
+    { month: '2026-03-01', quotes_sent: 7, quotes_won: 4, win_rate: 0.571, total_bid_value: 1180000, captured_value: 680000, avg_margin: 0.347, avg_quote_size: 168571, avg_turnaround_days: 7.6 },
+    { month: '2026-04-01', quotes_sent: 8, quotes_won: 4, win_rate: 0.500, total_bid_value: 1310000, captured_value: 662000, avg_margin: 0.344, avg_quote_size: 163750, avg_turnaround_days: 7.9 },
+    { month: '2026-05-01', quotes_sent: 4, quotes_won: 2, win_rate: 0.500, total_bid_value:  495000, captured_value: 288000, avg_margin: 0.348, avg_quote_size: 123750, avg_turnaround_days: 7.4 },
+  ],
+};
+
+const demoEstimatorHistory = {
+  1: [
+    { project: 'Ballantyne Corporate Park Ph.3', company: 'SouthPark Capital Partners',     stage: 'won',      value: 218000, margin: 0.34, quote_date: '2026-03-22', decision_date: '2026-04-08', turnaround: 10 },
+    { project: 'Crescent North Phase 2',         company: 'Crescent Property Group',        stage: 'won',      value: 288000, margin: 0.35, quote_date: '2026-04-10', decision_date: '2026-04-22', turnaround:  9 },
+    { project: 'South End Retail Shell Shades',  company: 'Brookline Builders',             stage: 'quoted',   value:  96500, margin: 0.35, quote_date: '2026-05-04', decision_date: null,          turnaround:  6 },
+    { project: 'South End Luxury Condos Ph.1',   company: 'Brookline Builders',             stage: 'revision', value: 208000, margin: 0.35, quote_date: '2026-04-08', decision_date: null,          turnaround: 14 },
+    { project: 'Steele Creek Business Park',     company: 'SouthPark Capital Partners',     stage: 'lost',     value: 132000, margin: 0.35, quote_date: '2026-03-02', decision_date: '2026-03-20',  turnaround: 12 },
+    { project: 'Dilworth Townhome Row',          company: 'Brookline Builders',             stage: 'lost',     value:  87000, margin: 0.34, quote_date: '2026-03-18', decision_date: '2026-04-01',  turnaround: 13 },
+  ],
+  2: [
+    { project: 'Birkdale Village Commons',    company: 'Huntersville Residential',      stage: 'won',    value: 312000, margin: 0.35, quote_date: '2026-03-28', decision_date: '2026-04-15', turnaround: 10 },
+    { project: 'Lake Norman Yacht Club',      company: 'Lakeside Hospitality Partners', stage: 'won',    value:  89000, margin: 0.38, quote_date: '2026-03-10', decision_date: '2026-03-25', turnaround:  9 },
+    { project: 'Davidson Mixed-Use Center',   company: 'Lakeside Hospitality Partners', stage: 'quoted', value: 198000, margin: 0.36, quote_date: '2026-04-30', decision_date: null,          turnaround:  9 },
+    { project: 'Mooresville Apartment Tower', company: 'Lakeside Hospitality Partners', stage: 'visit',  value: 275000, margin: 0.34, quote_date: null,         decision_date: null,          turnaround:  0 },
+    { project: 'Huntersville Office Park',    company: 'Huntersville Residential',      stage: 'lost',   value: 178000, margin: 0.35, quote_date: '2026-03-15', decision_date: '2026-04-02',  turnaround: 14 },
+  ],
+  3: [
+    { project: 'Columbia Medical Arts Bldg',  company: 'Palmetto Commercial Interiors', stage: 'won',    value: 245000, margin: 0.33, quote_date: '2026-03-22', decision_date: '2026-04-10', turnaround: 12 },
+    { project: 'Greenville Tech Campus',      company: 'Palmetto Commercial Interiors', stage: 'quoted', value: 188000, margin: 0.31, quote_date: '2026-04-28', decision_date: null,          turnaround: 13 },
+    { project: 'Spartanburg Senior Center',   company: 'Palmetto Commercial Interiors', stage: 'visit',  value: 112000, margin: 0.30, quote_date: null,         decision_date: null,          turnaround:  0 },
+    { project: 'Rock Hill Mixed-Use Phase 1', company: 'Palmetto Commercial Interiors', stage: 'lost',   value: 210000, margin: 0.30, quote_date: '2026-03-05', decision_date: '2026-03-22',  turnaround: 13 },
+  ],
+  4: [
+    { project: 'Greensboro Hub Plaza',       company: 'Triad Multifamily Group', stage: 'won',    value: 380000, margin: 0.35, quote_date: '2026-03-18', decision_date: '2026-04-05', turnaround: 13 },
+    { project: 'Winston-Salem Office Tower', company: 'Triad Multifamily Group', stage: 'won',    value: 195000, margin: 0.34, quote_date: '2026-02-28', decision_date: '2026-03-18', turnaround: 13 },
+    { project: 'High Point Furniture Mart',  company: 'Triad Multifamily Group', stage: 'quoted', value: 267000, margin: 0.36, quote_date: '2026-05-05', decision_date: null,          turnaround: 10 },
+    { project: 'Kernersville Logistics Hub', company: 'Triad Multifamily Group', stage: 'visit',  value: 142000, margin: 0.34, quote_date: null,         decision_date: null,          turnaround:  0 },
+    { project: 'Burlington Senior Living',   company: 'Triad Multifamily Group', stage: 'lead',   value: 320000, margin: 0.33, quote_date: null,         decision_date: null,          turnaround:  0 },
+    { project: 'Alamance Corporate Center',  company: 'Triad Multifamily Group', stage: 'lost',   value: 155000, margin: 0.34, quote_date: '2026-04-02', decision_date: '2026-04-18',  turnaround: 13 },
+  ],
+};
+
+const demoAllOpportunities = [
+  ...demoOpportunities.map((o) => ({ ...o, estimator_id: 1 })),
+  { id: 13, lead_name: 'Birkdale Village Commons',    company: 'Huntersville Residential',      territory_name: 'Lake Norman',    stage: 'won',        value: 312000, margin_pct: 0.35, estimator: 'Jordan Rivers', estimator_id: 2, created_date: '2026-03-18', quote_date: '2026-03-28', decision_date: '2026-04-15' },
+  { id: 14, lead_name: 'Davidson Mixed-Use Center',   company: 'Lakeside Hospitality Partners', territory_name: 'Lake Norman',    stage: 'quoted',     value: 198000, margin_pct: 0.36, estimator: 'Jordan Rivers', estimator_id: 2, created_date: '2026-04-20', quote_date: '2026-04-30', decision_date: null },
+  { id: 15, lead_name: 'Mooresville Apartment Tower', company: 'Lakeside Hospitality Partners', territory_name: 'Lake Norman',    stage: 'site-visit', value: 275000, margin_pct: 0.34, estimator: 'Jordan Rivers', estimator_id: 2, created_date: '2026-05-08', quote_date: null,         decision_date: null },
+  { id: 16, lead_name: 'Cornelius Retail Center',     company: 'Huntersville Residential',      territory_name: 'Lake Norman',    stage: 'lead',       value: 145000, margin_pct: 0.33, estimator: 'Jordan Rivers', estimator_id: 2, created_date: '2026-05-14', quote_date: null,         decision_date: null },
+  { id: 17, lead_name: 'Lake Norman Yacht Club',      company: 'Lakeside Hospitality Partners', territory_name: 'Lake Norman',    stage: 'won',        value:  89000, margin_pct: 0.38, estimator: 'Jordan Rivers', estimator_id: 2, created_date: '2026-02-28', quote_date: '2026-03-10', decision_date: '2026-03-25' },
+  { id: 18, lead_name: 'Huntersville Office Park',    company: 'Huntersville Residential',      territory_name: 'Lake Norman',    stage: 'lost',       value: 178000, margin_pct: 0.35, estimator: 'Jordan Rivers', estimator_id: 2, created_date: '2026-03-01', quote_date: '2026-03-15', decision_date: '2026-04-02' },
+  { id: 19, lead_name: 'Columbia Medical Arts Bldg',  company: 'Palmetto Commercial Interiors', territory_name: 'South Carolina', stage: 'won',        value: 245000, margin_pct: 0.33, estimator: 'Taylor Brooks', estimator_id: 3, created_date: '2026-03-10', quote_date: '2026-03-22', decision_date: '2026-04-10' },
+  { id: 20, lead_name: 'Greenville Tech Campus',      company: 'Palmetto Commercial Interiors', territory_name: 'South Carolina', stage: 'quoted',     value: 188000, margin_pct: 0.31, estimator: 'Taylor Brooks', estimator_id: 3, created_date: '2026-04-15', quote_date: '2026-04-28', decision_date: null },
+  { id: 21, lead_name: 'Spartanburg Senior Center',   company: 'Palmetto Commercial Interiors', territory_name: 'South Carolina', stage: 'site-visit', value: 112000, margin_pct: 0.30, estimator: 'Taylor Brooks', estimator_id: 3, created_date: '2026-05-11', quote_date: null,         decision_date: null },
+  { id: 22, lead_name: 'Myrtle Beach Resort Tower',   company: 'Palmetto Commercial Interiors', territory_name: 'South Carolina', stage: 'lead',       value: 455000, margin_pct: 0.32, estimator: 'Taylor Brooks', estimator_id: 3, created_date: '2026-05-16', quote_date: null,         decision_date: null },
+  { id: 23, lead_name: 'Rock Hill Mixed-Use Phase 1', company: 'Palmetto Commercial Interiors', territory_name: 'South Carolina', stage: 'lost',       value: 210000, margin_pct: 0.30, estimator: 'Taylor Brooks', estimator_id: 3, created_date: '2026-02-20', quote_date: '2026-03-05', decision_date: '2026-03-22' },
+  { id: 24, lead_name: 'Greensboro Hub Plaza',        company: 'Triad Multifamily Group',       territory_name: 'Triad',          stage: 'won',        value: 380000, margin_pct: 0.35, estimator: 'Morgan Lee',    estimator_id: 4, created_date: '2026-03-05', quote_date: '2026-03-18', decision_date: '2026-04-05' },
+  { id: 25, lead_name: 'Winston-Salem Office Tower',  company: 'Triad Multifamily Group',       territory_name: 'Triad',          stage: 'won',        value: 195000, margin_pct: 0.34, estimator: 'Morgan Lee',    estimator_id: 4, created_date: '2026-02-15', quote_date: '2026-02-28', decision_date: '2026-03-18' },
+  { id: 26, lead_name: 'High Point Furniture Mart',   company: 'Triad Multifamily Group',       territory_name: 'Triad',          stage: 'quoted',     value: 267000, margin_pct: 0.36, estimator: 'Morgan Lee',    estimator_id: 4, created_date: '2026-04-25', quote_date: '2026-05-05', decision_date: null },
+  { id: 27, lead_name: 'Kernersville Logistics Hub',  company: 'Triad Multifamily Group',       territory_name: 'Triad',          stage: 'site-visit', value: 142000, margin_pct: 0.34, estimator: 'Morgan Lee',    estimator_id: 4, created_date: '2026-05-09', quote_date: null,         decision_date: null },
+  { id: 28, lead_name: 'Burlington Senior Living',    company: 'Triad Multifamily Group',       territory_name: 'Triad',          stage: 'lead',       value: 320000, margin_pct: 0.33, estimator: 'Morgan Lee',    estimator_id: 4, created_date: '2026-05-15', quote_date: null,         decision_date: null },
+  { id: 29, lead_name: 'Alamance Corporate Center',   company: 'Triad Multifamily Group',       territory_name: 'Triad',          stage: 'lost',       value: 155000, margin_pct: 0.34, estimator: 'Morgan Lee',    estimator_id: 4, created_date: '2026-03-20', quote_date: '2026-04-02', decision_date: '2026-04-18' },
 ];
 
 // ─── Shared PM helpers ─────────────────────────────────────────────────────
@@ -1898,6 +1993,548 @@ function EstFinancialsView({ opportunities, metrics }) {
   );
 }
 
+// ─── Chief Estimator Components ───────────────────────────────────────────
+
+const EST_COLORS = ['var(--brand)', 'var(--gold)', 'var(--green)', 'var(--orange)'];
+
+function EstimatorProfilePanel({ estimator, onClose }) {
+  const history = demoEstimatorHistory[estimator.id] || [];
+  const monthly = demoEstimatorMonthlyData[estimator.id] || [];
+  const color   = EST_COLORS[(estimator.id - 1) % 4];
+  const stageColor = { won: 'badge-completed', lost: 'badge-pending', quoted: 'badge-active', visit: 'badge-pending', lead: 'badge-pending', revision: 'badge-pending' };
+  function initials(name) {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/);
+    return parts.length >= 2 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0].slice(0, 2).toUpperCase();
+  }
+  return (
+    <div className="detail-overlay" onClick={onClose}>
+      <div className="detail-panel" onClick={(e) => e.stopPropagation()}>
+        <div className="detail-header">
+          <div className="detail-avatar" style={{ background: color }}>{initials(estimator.name)}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2 style={{ margin: '0 0 4px', fontSize: 20 }}>{estimator.name}</h2>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
+              <span className="badge badge-active">{estimator.territory_name}</span>
+              <span className="badge badge-completed">Estimator</span>
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--muted)' }}>{estimator.email} · {estimator.phone}</div>
+          </div>
+          <button onClick={onClose} type="button" className="close-btn">✕</button>
+        </div>
+        <div className="detail-stats">
+          <div className="stat"><span>YTD Quotes</span><strong>{estimator.ytd_quotes}</strong><small>{estimator.ytd_won} won</small></div>
+          <div className="stat"><span>Win Rate</span><strong style={{ color: estimator.win_rate >= 0.5 ? 'var(--green)' : 'var(--orange)' }}>{formatRatio(estimator.win_rate)}</strong><small>Bid-to-win</small></div>
+          <div className="stat"><span>Captured</span><strong style={{ color }}>{compactMoney(estimator.captured)}</strong><small>Revenue won YTD</small></div>
+        </div>
+        <div className="detail-stats" style={{ borderTop: '1px solid var(--line)' }}>
+          <div className="stat"><span>Avg Margin</span><strong style={{ color: 'var(--green)' }}>{formatRatio(estimator.avg_margin)}</strong><small>Gross margin</small></div>
+          <div className="stat"><span>Turnaround</span><strong>{estimator.avg_turnaround.toFixed(1)}d</strong><small>Avg days to quote</small></div>
+          <div className="stat"><span>Active Est.</span><strong>{estimator.active_estimates}</strong><small>In progress</small></div>
+        </div>
+        <div className="detail-body">
+          {monthly.length > 0 && (
+            <>
+              <div className="detail-section-label">Monthly Performance</div>
+              <MiniLineChart data={monthly} seriesKeys={['total_bid_value', 'captured_value']} seriesColors={['var(--gold)', color]} height={130} />
+              <div className="chart-legend" style={{ padding: '0 0 16px' }}>
+                <span><i style={{ background: 'var(--gold)' }} />Bid Sent</span>
+                <span><i style={{ background: color }} />Captured</span>
+              </div>
+            </>
+          )}
+          {history.length > 0 && (
+            <>
+              <div className="detail-section-label" style={{ marginTop: 8 }}>Recent Projects</div>
+              <table>
+                <thead><tr><th>Project</th><th>Value</th><th>Margin</th><th>Stage</th></tr></thead>
+                <tbody>
+                  {history.map((h, i) => (
+                    <tr key={i}>
+                      <td><strong style={{ fontSize: 13 }}>{h.project}</strong><small>{h.company}</small></td>
+                      <td>{compactMoney(h.value)}</td>
+                      <td style={{ color: 'var(--green)', fontWeight: 700 }}>{formatRatio(h.margin)}</td>
+                      <td><span className={`badge ${stageColor[h.stage] || 'badge-pending'}`}>{h.stage}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ChiefTeamOverview({ onSelectEstimator }) {
+  const totalBid = demoEstimators.reduce((s, e) => s + e.total_bid, 0);
+  const totalCap = demoEstimators.reduce((s, e) => s + e.captured, 0);
+  const teamWon  = demoEstimators.reduce((s, e) => s + e.ytd_won, 0);
+  const teamQ    = demoEstimators.reduce((s, e) => s + e.ytd_quotes, 0);
+  const teamWin  = teamQ ? teamWon / teamQ : 0;
+  const totalAct = demoEstimators.reduce((s, e) => s + e.active_estimates, 0);
+  const maxCap   = Math.max(...demoEstimators.map((e) => e.captured), 1);
+
+  return (
+    <>
+      <section className="stats-grid" style={{ gridTemplateColumns: 'repeat(4,minmax(0,1fr))' }}>
+        <StatCard label="Team Total Bid"   value={compactMoney(totalBid)} note="YTD across all estimators" />
+        <StatCard label="Team Captured"    value={compactMoney(totalCap)} note="Revenue won YTD" />
+        <StatCard label="Team Win Rate"    value={formatRatio(teamWin)}   note="Aggregate bid-to-win" />
+        <StatCard label="Active Estimates" value={totalAct}               note="In progress across team" />
+      </section>
+      <section className="panel" style={{ marginBottom: 18 }}>
+        <div className="panel-head"><h2>Estimator Roster</h2><span>Click any row to view full profile</span></div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Estimator</th><th>Territory</th>
+              <th style={{ textAlign: 'right' }}>Quotes</th><th style={{ textAlign: 'right' }}>Won</th>
+              <th style={{ textAlign: 'right' }}>Win Rate</th><th style={{ textAlign: 'right' }}>Bid Value</th>
+              <th style={{ textAlign: 'right' }}>Captured</th><th style={{ textAlign: 'right' }}>Margin</th>
+              <th style={{ textAlign: 'right' }}>Turnaround</th><th style={{ textAlign: 'right' }}>Active</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[...demoEstimators].sort((a, b) => b.captured - a.captured).map((est, rank) => (
+              <tr key={est.id} className="hoverable-row" onClick={() => onSelectEstimator(est)}>
+                <td><strong style={{ color: 'var(--muted)' }}>{rank + 1}</strong></td>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: EST_COLORS[est.id - 1], color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>
+                      {est.name.split(' ').map((p) => p[0]).join('')}
+                    </div>
+                    <div><strong style={{ fontSize: 13 }}>{est.name}</strong><small>{est.email}</small></div>
+                  </div>
+                </td>
+                <td><span className="badge badge-active">{est.territory_name}</span></td>
+                <td style={{ textAlign: 'right' }}>{est.ytd_quotes}</td>
+                <td style={{ textAlign: 'right', color: 'var(--green)', fontWeight: 700 }}>{est.ytd_won}</td>
+                <td style={{ textAlign: 'right' }}><span style={{ color: est.win_rate >= 0.5 ? 'var(--green)' : 'var(--orange)', fontWeight: 700 }}>{formatRatio(est.win_rate)}</span></td>
+                <td style={{ textAlign: 'right' }}>{compactMoney(est.total_bid)}</td>
+                <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--brand)' }}>{compactMoney(est.captured)}</td>
+                <td style={{ textAlign: 'right', color: 'var(--green)', fontWeight: 600 }}>{formatRatio(est.avg_margin)}</td>
+                <td style={{ textAlign: 'right' }}>{est.avg_turnaround.toFixed(1)}d</td>
+                <td style={{ textAlign: 'right' }}>{est.active_estimates}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+        <section className="panel">
+          <div className="panel-head"><h2>Win Rate Comparison</h2><span>YTD bid-to-win %</span></div>
+          <div style={{ padding: '16px 18px', display: 'grid', gap: 14 }}>
+            {[...demoEstimators].sort((a, b) => b.win_rate - a.win_rate).map((est) => (
+              <PmBar key={est.id} label={est.name} value={est.win_rate} max={1} color={EST_COLORS[est.id - 1]} sub={formatRatio(est.win_rate)} />
+            ))}
+          </div>
+        </section>
+        <section className="panel">
+          <div className="panel-head"><h2>Revenue Captured</h2><span>YTD won value</span></div>
+          <div style={{ padding: '16px 18px', display: 'grid', gap: 14 }}>
+            {[...demoEstimators].sort((a, b) => b.captured - a.captured).map((est) => (
+              <PmBar key={est.id} label={est.name} value={est.captured} max={maxCap} color={EST_COLORS[est.id - 1]} />
+            ))}
+          </div>
+        </section>
+      </div>
+    </>
+  );
+}
+
+function ChiefPerformanceBoard({ onSelectEstimator }) {
+  const monthKeys = ['2026-01-01', '2026-02-01', '2026-03-01', '2026-04-01', '2026-05-01'];
+  const teamMonthly = monthKeys.map((mk, i) => ({
+    month: mk,
+    alex:   demoEstimatorMonthlyData[1][i]?.captured_value || 0,
+    jordan: demoEstimatorMonthlyData[2][i]?.captured_value || 0,
+    taylor: demoEstimatorMonthlyData[3][i]?.captured_value || 0,
+    morgan: demoEstimatorMonthlyData[4][i]?.captured_value || 0,
+  }));
+  const maxTurnaround = Math.max(...demoEstimators.map((e) => e.avg_turnaround), 1);
+  const maxBid        = Math.max(...demoEstimators.map((e) => e.total_bid), 1);
+
+  return (
+    <>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 18 }}>
+        {demoEstimators.map((est, i) => (
+          <section key={est.id} className="panel" style={{ cursor: 'pointer' }} onClick={() => onSelectEstimator(est)}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '16px 18px 12px', borderBottom: '1px solid var(--line)' }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', background: EST_COLORS[i], color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
+                {est.name.split(' ').map((p) => p[0]).join('')}
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <strong style={{ fontSize: 13, display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{est.name}</strong>
+                <span style={{ fontSize: 11, color: 'var(--muted)' }}>{est.territory_name}</span>
+              </div>
+            </div>
+            <div style={{ padding: '12px 18px', display: 'grid', gap: 8 }}>
+              {[
+                ['Win Rate',   formatRatio(est.win_rate),   est.win_rate >= 0.5 ? 'var(--green)' : 'var(--orange)'],
+                ['Captured',   compactMoney(est.captured),  EST_COLORS[i]],
+                ['Margin',     formatRatio(est.avg_margin), 'var(--green)'],
+                ['Turnaround', `${est.avg_turnaround.toFixed(1)}d`, est.avg_turnaround <= 7.5 ? 'var(--green)' : 'var(--orange)'],
+              ].map(([label, value, color]) => (
+                <div key={label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
+                  <span style={{ color: 'var(--muted)', fontWeight: 600 }}>{label}</span>
+                  <strong style={{ color }}>{value}</strong>
+                </div>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, marginBottom: 18 }}>
+        <section className="panel">
+          <div className="panel-head"><h2>Avg Turnaround</h2><span>Days to submit quote — lower is better</span></div>
+          <div style={{ padding: '16px 18px', display: 'grid', gap: 14 }}>
+            {[...demoEstimators].sort((a, b) => a.avg_turnaround - b.avg_turnaround).map((est) => (
+              <PmBar key={est.id} label={est.name} value={est.avg_turnaround} max={maxTurnaround}
+                color={est.avg_turnaround <= 7.5 ? 'var(--green)' : 'var(--orange)'}
+                sub={`${est.avg_turnaround.toFixed(1)}d`} />
+            ))}
+          </div>
+        </section>
+        <section className="panel">
+          <div className="panel-head"><h2>Total Bid Volume</h2><span>YTD bid dollars submitted</span></div>
+          <div style={{ padding: '16px 18px', display: 'grid', gap: 14 }}>
+            {[...demoEstimators].sort((a, b) => b.total_bid - a.total_bid).map((est) => (
+              <PmBar key={est.id} label={est.name} value={est.total_bid} max={maxBid} color={EST_COLORS[est.id - 1]} />
+            ))}
+          </div>
+        </section>
+      </div>
+      <section className="panel">
+        <div className="panel-head"><h2>Team Capture Trend</h2><span>Monthly revenue captured per estimator — click a card above to view individual profiles</span></div>
+        <MiniLineChart data={teamMonthly} seriesKeys={['alex', 'jordan', 'taylor', 'morgan']} seriesColors={EST_COLORS} height={180} />
+        <div className="chart-legend" style={{ padding: '0 18px 14px' }}>
+          {demoEstimators.map((est, i) => (
+            <span key={est.id}><i style={{ background: EST_COLORS[i] }} />{est.name.split(' ')[0]}</span>
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}
+
+function ChiefAllOpportunities({ onSelectEstimator }) {
+  const [filterEst,   setFilterEst]   = useState('all');
+  const [filterStage, setFilterStage] = useState('all');
+  const filtered = demoAllOpportunities.filter((o) => {
+    const estMatch   = filterEst   === 'all' || o.estimator === filterEst;
+    const stageMatch = filterStage === 'all' || o.stage     === filterStage;
+    return estMatch && stageMatch;
+  }).sort((a, b) => (b.created_date || '').localeCompare(a.created_date || ''));
+  const won  = filtered.filter((o) => o.stage === 'won');
+  const open = filtered.filter((o) => !['won', 'lost'].includes(o.stage));
+  const stageColors = { won: 'badge-completed', lost: 'badge-pending', quoted: 'badge-active', 'site-visit': 'badge-pending', lead: 'badge-pending' };
+
+  return (
+    <>
+      <section className="stats-grid" style={{ gridTemplateColumns: 'repeat(4,minmax(0,1fr))' }}>
+        <StatCard label="Total Opps"    value={demoAllOpportunities.length}                          note="Across all estimators" />
+        <StatCard label="Open Pipeline" value={compactMoney(open.reduce((s, o) => s + o.value, 0))} note={`${open.length} active`} />
+        <StatCard label="Won YTD"       value={compactMoney(won.reduce((s, o) => s + o.value, 0))}  note={`${won.length} deals`} />
+        <StatCard label="Showing"       value={filtered.length}                                      note="After filters" />
+      </section>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14, alignItems: 'center' }}>
+        {['all', ...demoEstimators.map((e) => e.name)].map((v) => (
+          <button key={v} type="button" onClick={() => setFilterEst(v)}
+            style={{ background: filterEst === v ? 'var(--brand)' : '#eef3f6', color: filterEst === v ? '#fff' : 'var(--brand)', fontSize: 12, padding: '7px 14px', fontWeight: 700 }}>
+            {v === 'all' ? 'All Estimators' : v}
+          </button>
+        ))}
+        <select value={filterStage} onChange={(e) => setFilterStage(e.target.value)} style={{ fontSize: 13, marginLeft: 'auto' }}>
+          <option value="all">All Stages</option>
+          <option value="lead">Lead</option>
+          <option value="site-visit">Site Visit</option>
+          <option value="quoted">Quoted</option>
+          <option value="won">Won</option>
+          <option value="lost">Lost</option>
+        </select>
+      </div>
+      <section className="panel">
+        <div className="panel-head"><h2>All Opportunities</h2><span>{filtered.length} results</span></div>
+        <table>
+          <thead><tr><th>Project</th><th>Estimator</th><th>Territory</th><th>Stage</th><th style={{ textAlign: 'right' }}>Value</th><th style={{ textAlign: 'right' }}>Margin</th><th>Created</th><th>Quote Date</th></tr></thead>
+          <tbody>
+            {filtered.map((o) => (
+              <tr key={o.id}>
+                <td><strong style={{ fontSize: 13 }}>{o.lead_name}</strong><small>{o.company}</small></td>
+                <td style={{ fontSize: 12 }}>{o.estimator}</td>
+                <td><span className="badge badge-active" style={{ fontSize: 11 }}>{o.territory_name}</span></td>
+                <td><span className={`badge ${stageColors[o.stage] || 'badge-pending'}`}>{o.stage}</span></td>
+                <td style={{ textAlign: 'right', fontWeight: 700 }}>{currency(o.value)}</td>
+                <td style={{ textAlign: 'right', color: 'var(--green)', fontWeight: 600 }}>{formatRatio(o.margin_pct)}</td>
+                <td style={{ fontSize: 12 }}>{shortDate(o.created_date)}</td>
+                <td style={{ fontSize: 12 }}>{o.quote_date ? shortDate(o.quote_date) : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </>
+  );
+}
+
+function ChiefBidsQuotes() {
+  const [filterEst, setFilterEst] = useState('all');
+  const allQuoted = demoAllOpportunities.filter((o) => ['quoted', 'site-visit', 'won', 'lost'].includes(o.stage));
+  const filtered  = filterEst === 'all' ? allQuoted : allQuoted.filter((o) => o.estimator === filterEst);
+  const stageColors = { won: 'badge-completed', lost: 'badge-pending', quoted: 'badge-active', 'site-visit': 'badge-pending' };
+
+  return (
+    <>
+      <section className="stats-grid" style={{ gridTemplateColumns: 'repeat(4,minmax(0,1fr))' }}>
+        <StatCard label="Total Quoted" value={demoAllOpportunities.filter((o) => o.stage === 'quoted').length} note="Awaiting decision" />
+        <StatCard label="Won YTD"      value={demoAllOpportunities.filter((o) => o.stage === 'won').length}    note="Across team" />
+        <StatCard label="Lost YTD"     value={demoAllOpportunities.filter((o) => o.stage === 'lost').length}   note="Across team" />
+        <StatCard label="Total Bid $"  value={compactMoney(demoEstimators.reduce((s, e) => s + e.total_bid, 0))} note="YTD all estimators" />
+      </section>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 14 }}>
+        {['all', ...demoEstimators.map((e) => e.name)].map((v) => (
+          <button key={v} type="button" onClick={() => setFilterEst(v)}
+            style={{ background: filterEst === v ? 'var(--brand)' : '#eef3f6', color: filterEst === v ? '#fff' : 'var(--brand)', fontSize: 12, padding: '7px 14px', fontWeight: 700 }}>
+            {v === 'all' ? 'All Estimators' : v}
+          </button>
+        ))}
+      </div>
+      <section className="panel">
+        <div className="panel-head"><h2>Bids & Quotes</h2><span>{filtered.length} records</span></div>
+        <table>
+          <thead><tr><th>Project</th><th>Estimator</th><th>Territory</th><th>Stage</th><th style={{ textAlign: 'right' }}>Bid Value</th><th style={{ textAlign: 'right' }}>Margin</th><th>Quote Date</th><th>Decision Date</th></tr></thead>
+          <tbody>
+            {[...filtered].sort((a, b) => (b.quote_date || '').localeCompare(a.quote_date || '')).map((o) => (
+              <tr key={o.id}>
+                <td><strong style={{ fontSize: 13 }}>{o.lead_name}</strong><small>{o.company}</small></td>
+                <td style={{ fontSize: 12 }}>{o.estimator}</td>
+                <td><span className="badge badge-active" style={{ fontSize: 11 }}>{o.territory_name}</span></td>
+                <td><span className={`badge ${stageColors[o.stage] || 'badge-pending'}`}>{o.stage}</span></td>
+                <td style={{ textAlign: 'right', fontWeight: 700 }}>{currency(o.value)}</td>
+                <td style={{ textAlign: 'right', color: 'var(--green)', fontWeight: 600 }}>{formatRatio(o.margin_pct)}</td>
+                <td style={{ fontSize: 12 }}>{o.quote_date ? shortDate(o.quote_date) : '—'}</td>
+                <td style={{ fontSize: 12 }}>{o.decision_date ? shortDate(o.decision_date) : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </>
+  );
+}
+
+function ChiefLiftCapture() {
+  const teamTotalBid = demoEstimators.reduce((s, e) => s + e.total_bid, 0);
+  const teamCaptured = demoEstimators.reduce((s, e) => s + e.captured, 0);
+  const teamWon      = demoEstimators.reduce((s, e) => s + e.ytd_won, 0);
+  const teamQuotes   = demoEstimators.reduce((s, e) => s + e.ytd_quotes, 0);
+  const teamRate     = teamQuotes ? teamWon / teamQuotes : 0;
+  const monthKeys    = ['2026-01-01', '2026-02-01', '2026-03-01', '2026-04-01', '2026-05-01'];
+  const teamMonthly  = monthKeys.map((mk, i) => ({
+    month: mk,
+    bid: demoEstimators.reduce((s, est) => s + (demoEstimatorMonthlyData[est.id][i]?.total_bid_value || 0), 0),
+    cap: demoEstimators.reduce((s, est) => s + (demoEstimatorMonthlyData[est.id][i]?.captured_value  || 0), 0),
+  }));
+
+  return (
+    <>
+      <section className="stats-grid" style={{ gridTemplateColumns: 'repeat(4,minmax(0,1fr))' }}>
+        <StatCard label="Team Bid Value" value={compactMoney(teamTotalBid)}                                              note="YTD across all estimators" />
+        <StatCard label="Team Captured"  value={compactMoney(teamCaptured)}                                              note="Revenue won YTD" />
+        <StatCard label="Team Win Rate"  value={formatRatio(teamRate)}                                                   note="Aggregate capture rate" />
+        <StatCard label="Open Pipeline"  value={compactMoney(demoEstimators.reduce((s, e) => s + e.pipeline_value, 0))} note="Active opportunity value" />
+      </section>
+      <section className="panel" style={{ marginBottom: 18 }}>
+        <div className="panel-head"><h2>Per-Estimator Lift & Capture</h2><span>YTD breakdown</span></div>
+        <table>
+          <thead>
+            <tr>
+              <th>Estimator</th>
+              <th style={{ textAlign: 'right' }}>Quotes</th><th style={{ textAlign: 'right' }}>Won</th>
+              <th style={{ textAlign: 'right' }}>Win Rate</th><th style={{ textAlign: 'right' }}>Bid Value</th>
+              <th style={{ textAlign: 'right' }}>Captured</th><th style={{ textAlign: 'right' }}>Capture %</th>
+              <th style={{ textAlign: 'right' }}>Avg Margin</th>
+            </tr>
+          </thead>
+          <tbody>
+            {demoEstimators.map((est, i) => (
+              <tr key={est.id}>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: EST_COLORS[i], flexShrink: 0 }} />
+                    <strong>{est.name}</strong>
+                    <span style={{ fontSize: 11, color: 'var(--muted)' }}>{est.territory_name}</span>
+                  </div>
+                </td>
+                <td style={{ textAlign: 'right' }}>{est.ytd_quotes}</td>
+                <td style={{ textAlign: 'right', color: 'var(--green)', fontWeight: 700 }}>{est.ytd_won}</td>
+                <td style={{ textAlign: 'right' }}><span style={{ color: est.win_rate >= 0.5 ? 'var(--green)' : 'var(--orange)', fontWeight: 700 }}>{formatRatio(est.win_rate)}</span></td>
+                <td style={{ textAlign: 'right' }}>{compactMoney(est.total_bid)}</td>
+                <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--brand)' }}>{compactMoney(est.captured)}</td>
+                <td style={{ textAlign: 'right', color: 'var(--green)', fontWeight: 700 }}>{formatRatio(est.captured / est.total_bid)}</td>
+                <td style={{ textAlign: 'right', color: 'var(--green)' }}>{formatRatio(est.avg_margin)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+      <section className="panel">
+        <div className="panel-head"><h2>Team Monthly Capture</h2><span>Total bid vs captured by month</span></div>
+        <MiniLineChart data={teamMonthly} seriesKeys={['bid', 'cap']} seriesColors={['var(--gold)', 'var(--brand)']} height={180} />
+        <div className="chart-legend" style={{ padding: '0 18px 14px' }}>
+          <span><i style={{ background: 'var(--gold)' }} />Team Bid</span>
+          <span><i style={{ background: 'var(--brand)' }} />Team Captured</span>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function ChiefFinancials() {
+  const monthKeys   = ['2026-01-01', '2026-02-01', '2026-03-01', '2026-04-01', '2026-05-01'];
+  const teamMonthly = monthKeys.map((mk, i) => ({
+    month: mk,
+    alex:   demoEstimatorMonthlyData[1][i]?.captured_value || 0,
+    jordan: demoEstimatorMonthlyData[2][i]?.captured_value || 0,
+    taylor: demoEstimatorMonthlyData[3][i]?.captured_value || 0,
+    morgan: demoEstimatorMonthlyData[4][i]?.captured_value || 0,
+  }));
+  const totalBid  = demoEstimators.reduce((s, e) => s + e.total_bid, 0);
+  const totalCap  = demoEstimators.reduce((s, e) => s + e.captured, 0);
+  const totalPipe = demoEstimators.reduce((s, e) => s + e.pipeline_value, 0);
+  const avgMargin = demoEstimators.reduce((s, e) => s + e.avg_margin, 0) / demoEstimators.length;
+  const maxCap    = Math.max(...demoEstimators.map((e) => e.captured), 1);
+
+  return (
+    <>
+      <section className="stats-grid" style={{ gridTemplateColumns: 'repeat(4,minmax(0,1fr))' }}>
+        <StatCard label="Total Bid Volume" value={compactMoney(totalBid)}    note="YTD across team" />
+        <StatCard label="Total Captured"   value={compactMoney(totalCap)}    note="Revenue won YTD" />
+        <StatCard label="Open Pipeline"    value={compactMoney(totalPipe)}   note="Active deal value" />
+        <StatCard label="Avg Team Margin"  value={formatRatio(avgMargin)}    note="Gross margin YTD" />
+      </section>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18, marginBottom: 18 }}>
+        <section className="panel">
+          <div className="panel-head"><h2>Revenue by Estimator</h2><span>YTD captured value</span></div>
+          <div style={{ padding: '16px 18px', display: 'grid', gap: 14 }}>
+            {[...demoEstimators].sort((a, b) => b.captured - a.captured).map((est) => (
+              <PmBar key={est.id} label={`${est.name} — ${est.territory_name}`} value={est.captured} max={maxCap} color={EST_COLORS[est.id - 1]} />
+            ))}
+          </div>
+        </section>
+        <section className="panel">
+          <div className="panel-head"><h2>Financial Summary</h2><span>Team-wide totals</span></div>
+          <div style={{ padding: '16px 18px' }}>
+            {[
+              ['Total Bid Submitted',    currency(totalBid),             'var(--gold)'],
+              ['Total Captured',         currency(totalCap),             'var(--green)'],
+              ['Open Pipeline',          currency(totalPipe),            'var(--brand)'],
+              ['Expected Capture (50%)', currency(totalPipe * 0.5),      'var(--orange)'],
+              ['Expected Gross Profit',  currency(totalCap * avgMargin), 'var(--green)'],
+              ['Overall Win Rate',       formatRatio(totalCap / totalBid), 'var(--green)'],
+              ['Avg Team Margin',        formatRatio(avgMargin),         'var(--green)'],
+            ].map(([label, value, color]) => (
+              <div key={label} style={{ display: 'flex', justifyContent: 'space-between', padding: '9px 0', borderBottom: '1px solid var(--line)', fontSize: 14 }}>
+                <span style={{ color: 'var(--muted)', fontWeight: 600 }}>{label}</span>
+                <strong style={{ color }}>{value}</strong>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+      <section className="panel">
+        <div className="panel-head"><h2>Per-Estimator Revenue Trend</h2><span>Monthly captured value by estimator</span></div>
+        <MiniLineChart data={teamMonthly} seriesKeys={['alex', 'jordan', 'taylor', 'morgan']} seriesColors={EST_COLORS} height={180} />
+        <div className="chart-legend" style={{ padding: '0 18px 14px' }}>
+          {demoEstimators.map((est, i) => (
+            <span key={est.id}><i style={{ background: EST_COLORS[i] }} />{est.name.split(' ')[0]}</span>
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}
+
+// ─── ChiefEstimatorDashboard ────────────────────────────────────────────────
+
+function ChiefEstimatorDashboard({ user }) {
+  const [activeView,   setActiveView]   = useState('dashboard');
+  const [selectedEst,  setSelectedEst]  = useState(null);
+
+  const navGroups = [
+    { label: 'OVERVIEW',  items: [['dashboard', 'Dashboard'], ['performance', 'Performance Board']] },
+    { label: 'PIPELINE',  items: [['opportunities', 'All Opportunities'], ['bids', 'Bids & Quotes']] },
+    { label: 'ANALYTICS', items: [['lift', 'Lift & Capture'], ['financials', 'Financials'], ['reports', 'Reports']] },
+    { label: null,        items: [['schedule', 'Schedule']] },
+  ];
+  const navUtil = [['messages', 'Messages'], ['documents', 'Documents'], ['alerts', 'Alerts'], ['settings', 'Settings']];
+  const allItems = navGroups.flatMap((g) => g.items).concat(navUtil);
+  const currentLabel = allItems.find(([id]) => id === activeView)?.[1] || '';
+
+  function initials(name) {
+    if (!name) return '?';
+    const parts = name.trim().split(/\s+/);
+    return parts.length >= 2 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0].slice(0, 2).toUpperCase();
+  }
+  function formatRole(role) {
+    if (!role) return 'Chief Estimator';
+    return role.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }
+
+  return (
+    <div className="app-shell">
+      <aside className="sidebar">
+        <div className="brand"><strong>James Blinds</strong><span>Mission Control</span></div>
+        {navGroups.map((group, gi) => (
+          <React.Fragment key={gi}>
+            {group.label && <div className="nav-section-label">{group.label}</div>}
+            {group.items.map(([id, label]) => (
+              <button key={id} className={activeView === id ? 'nav-active' : ''} onClick={() => setActiveView(id)} type="button">{label}</button>
+            ))}
+          </React.Fragment>
+        ))}
+        <div className="nav-divider" />
+        {navUtil.map(([id, label]) => (
+          <button key={id} className={activeView === id ? 'nav-active' : ''} onClick={() => setActiveView(id)} type="button">{label}</button>
+        ))}
+        <div className="user-card">
+          <div className="user-avatar">{initials(user.name)}</div>
+          <div className="user-info"><strong>{user.name}</strong><span>{formatRole(user.role)}</span></div>
+        </div>
+      </aside>
+
+      <main className="dashboard">
+        <header className="page-head">
+          <div><p>All Territories</p><h1>{currentLabel}</h1></div>
+          <div className="actions">
+            <div style={{ padding: '10px 14px', background: '#eef3f6', borderRadius: 6, color: 'var(--brand)', fontWeight: 700, fontSize: 14, border: '1px solid var(--line)', whiteSpace: 'nowrap' }}>
+              Chief Estimator — Full Access
+            </div>
+            <button type="button">Refresh Data</button>
+          </div>
+        </header>
+
+        {activeView === 'dashboard'     && <ChiefTeamOverview     key="dash"  onSelectEstimator={setSelectedEst} />}
+        {activeView === 'performance'   && <ChiefPerformanceBoard key="perf"  onSelectEstimator={setSelectedEst} />}
+        {activeView === 'opportunities' && <ChiefAllOpportunities key="opps"  onSelectEstimator={setSelectedEst} />}
+        {activeView === 'bids'          && <ChiefBidsQuotes       key="bids" />}
+        {activeView === 'lift'          && <ChiefLiftCapture      key="lift" />}
+        {activeView === 'financials'    && <ChiefFinancials       key="fin" />}
+        {activeView === 'reports'       && <PlaceholderView title="Reports"   icon="📊" description="Team-wide estimate summary, win/loss analysis, and territory breakdowns coming soon." />}
+        {activeView === 'schedule'      && <EstScheduleView       key="sched" visits={demoSiteVisits} />}
+        {activeView === 'messages'      && <PlaceholderView title="Messages"  icon="💬" description="Team messaging and estimator communication threads coming soon." />}
+        {activeView === 'documents'     && <PlaceholderView title="Documents" icon="📄" description="Estimate templates, past quotes, and scope sheets coming soon." />}
+        {activeView === 'alerts'        && <PlaceholderView title="Alerts"    icon="🔔" description="Underpriced job flags, missing measurements, and deadline alerts coming soon." />}
+        {activeView === 'settings'      && <PlaceholderView title="Settings"  icon="⚙️" description="Team configuration, territory assignments, and notification settings coming soon." />}
+
+        {selectedEst && <EstimatorProfilePanel estimator={selectedEst} onClose={() => setSelectedEst(null)} />}
+      </main>
+    </div>
+  );
+}
+
 // ─── EstimatorDashboard ────────────────────────────────────────────────────
 
 function EstimatorDashboard({ user }) {
@@ -2004,6 +2641,7 @@ function EstimatorDashboard({ user }) {
 function App() {
   const [user, setUser] = useState(null);
   if (!user) return <LoginScreen onLogin={setUser} />;
+  if (user.role === 'chief_estimator') return <ChiefEstimatorDashboard user={user} />;
   if (user.role === 'estimator') return <EstimatorDashboard user={user} />;
   return <ProjectManagerDashboard user={user} />;
 }

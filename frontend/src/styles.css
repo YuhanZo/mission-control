@@ -993,3 +993,17 @@ td small {
   opacity: 0;
   animation: dotFadeIn 0.28s ease forwards;
 }
+
+/* ─── Nav section labels (Chief Estimator grouped nav) ──────────────────── */
+
+.nav-section-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .35);
+  padding: 14px 16px 4px;
+  margin-top: 2px;
+  pointer-events: none;
+  user-select: none;
+}
