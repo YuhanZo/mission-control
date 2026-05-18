@@ -1267,6 +1267,131 @@ function ProjectManagerDashboard({ user }) {
 
 // ─── Estimator Views ───────────────────────────────────────────────────────
 
+function CaptureLineChart({ metrics }) {
+  const W = 560; const H = 210;
+  const pad = { top: 16, right: 24, bottom: 30, left: 58 };
+  const pw  = W - pad.left - pad.right;
+  const ph  = H - pad.top  - pad.bottom;
+
+  const allV  = metrics.flatMap((m) => [m.total_bid_value, m.captured_value]);
+  const maxV  = Math.max(...allV, 1);
+  const xi    = (i) => pad.left + (i / Math.max(metrics.length - 1, 1)) * pw;
+  const yi    = (v) => pad.top  + (1 - v / maxV) * ph;
+  const baseY = (pad.top + ph).toFixed(1);
+
+  const linePath = (key) => metrics.reduce((p, m, i) => {
+    const pt = `${xi(i).toFixed(1)} ${yi(m[key]).toFixed(1)}`;
+    return p ? `${p} L ${pt}` : `M ${pt}`;
+  }, '');
+  const areaPath = (key) => {
+    const pts = metrics.map((m, i) => `${xi(i).toFixed(1)},${yi(m[key]).toFixed(1)}`);
+    return `M ${xi(0).toFixed(1)},${baseY} L ${pts.join(' L ')} L ${xi(metrics.length - 1).toFixed(1)},${baseY} Z`;
+  };
+  const ticks = [0.25, 0.5, 0.75, 1].map((r) => maxV * r);
+
+  const ytdBid = metrics.reduce((s, m) => s + m.total_bid_value, 0);
+  const ytdCap = metrics.reduce((s, m) => s + m.captured_value, 0);
+  const avgRate = metrics.reduce((s, m) => s + m.win_rate, 0) / metrics.length;
+
+  return (
+    <section className="panel">
+      <div className="panel-head"><h2>Monthly Capture</h2><span>{metrics.length} months</span></div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', borderBottom: '1px solid var(--line)' }}>
+        {[
+          ['YTD Bid',    compactMoney(ytdBid),  'var(--gold)'],
+          ['YTD Won',    compactMoney(ytdCap),  'var(--brand)'],
+          ['Avg Rate',   formatRatio(avgRate),   'var(--green)'],
+        ].map(([label, value, color], idx) => (
+          <div key={label} style={{ padding: '10px 16px', borderRight: idx < 2 ? '1px solid var(--line)' : 'none' }}>
+            <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '.08em', color: 'var(--muted)', textTransform: 'uppercase' }}>{label}</div>
+            <div style={{ fontSize: 17, fontWeight: 700, color, marginTop: 3 }}>{value}</div>
+          </div>
+        ))}
+      </div>
+
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block' }}>
+        <defs>
+          <linearGradient id="capGold" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor="#d99b2b" stopOpacity=".22" />
+            <stop offset="100%" stopColor="#d99b2b" stopOpacity="0"   />
+          </linearGradient>
+          <linearGradient id="capBrand" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor="#214f6f" stopOpacity=".18" />
+            <stop offset="100%" stopColor="#214f6f" stopOpacity="0"   />
+          </linearGradient>
+        </defs>
+
+        {ticks.map((tick) => (
+          <g key={tick}>
+            <line x1={pad.left} x2={W - pad.right} y1={yi(tick)} y2={yi(tick)} stroke="#e8edf0" strokeWidth="1" />
+            <text x={pad.left - 8} y={yi(tick) + 4} textAnchor="end" fill="#6f7a84" fontSize="11">{compactMoney(tick)}</text>
+          </g>
+        ))}
+        {metrics.map((m, i) => (
+          <text key={i} x={xi(i)} y={H - 8} textAnchor="middle" fill="#6f7a84" fontSize="11">
+            {monthLabel(m.metric_month || m.month || '')}
+          </text>
+        ))}
+
+        <path d={areaPath('total_bid_value')} fill="url(#capGold)" />
+        <path d={areaPath('captured_value')}  fill="url(#capBrand)" />
+
+        <path d={linePath('total_bid_value')} fill="none" stroke="var(--gold)"  strokeWidth="2.5" className="animated-line" style={{ animationDelay: '0.1s' }} />
+        <path d={linePath('captured_value')}  fill="none" stroke="var(--brand)" strokeWidth="2.5" className="animated-line" style={{ animationDelay: '0.3s' }} />
+
+        {metrics.map((m, i) => (
+          <circle key={`bid-${i}`} cx={xi(i)} cy={yi(m.total_bid_value)} r="4" fill="var(--gold)"
+            stroke="#fff" strokeWidth="1.5" className="animated-dot" style={{ animationDelay: `${0.9 + i * 0.07}s` }} />
+        ))}
+        {metrics.map((m, i) => (
+          <circle key={`cap-${i}`} cx={xi(i)} cy={yi(m.captured_value)} r="4" fill="var(--brand)"
+            stroke="#fff" strokeWidth="1.5" className="animated-dot" style={{ animationDelay: `${1.1 + i * 0.07}s` }} />
+        ))}
+
+        {(() => {
+          const last = metrics[metrics.length - 1];
+          const lx = xi(metrics.length - 1);
+          const bidY = yi(last.total_bid_value);
+          const capY = yi(last.captured_value);
+          return (
+            <>
+              <text x={lx - 10} y={bidY - 9} textAnchor="end" fill="var(--gold)"  fontSize="11" fontWeight="700">{compactMoney(last.total_bid_value)}</text>
+              <text x={lx - 10} y={capY + 16} textAnchor="end" fill="var(--brand)" fontSize="11" fontWeight="700">{compactMoney(last.captured_value)}</text>
+            </>
+          );
+        })()}
+      </svg>
+
+      <div className="chart-legend" style={{ padding: '4px 18px 8px' }}>
+        <span><i style={{ background: 'var(--gold)' }} />Bid Sent</span>
+        <span><i style={{ background: 'var(--brand)' }} />Captured</span>
+      </div>
+
+      <table style={{ margin: '0 0 4px' }}>
+        <thead>
+          <tr>
+            <th>Month</th>
+            <th style={{ textAlign: 'right' }}>Bid Sent</th>
+            <th style={{ textAlign: 'right' }}>Captured</th>
+            <th style={{ textAlign: 'right' }}>Win Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          {metrics.map((m, i) => (
+            <tr key={i}>
+              <td><strong>{monthLabel(m.metric_month || m.month || '')}</strong></td>
+              <td style={{ textAlign: 'right', color: 'var(--gold)', fontWeight: 600 }}>{compactMoney(m.total_bid_value)}</td>
+              <td style={{ textAlign: 'right', color: 'var(--brand)', fontWeight: 600 }}>{compactMoney(m.captured_value)}</td>
+              <td style={{ textAlign: 'right', color: 'var(--green)', fontWeight: 700 }}>{formatRatio(m.win_rate)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
 function EstDashboardHome({ opportunities, estimates, metrics }) {
   const won       = opportunities.filter((o) => o.stage === 'won');
   const open      = opportunities.filter((o) => !['won', 'lost'].includes(o.stage));
@@ -1318,14 +1443,7 @@ function EstDashboardHome({ opportunities, estimates, metrics }) {
             </tbody>
           </table>
         </section>
-        <section className="panel">
-          <div className="panel-head"><h2>Monthly Capture</h2><span>Bid sent vs won</span></div>
-          <MiniLineChart data={metrics} seriesKeys={['total_bid_value', 'captured_value']} seriesColors={['var(--gold)', 'var(--brand)']} />
-          <div className="chart-legend" style={{ padding: '0 18px 14px' }}>
-            <span><i style={{ background: 'var(--gold)' }} />Bid Sent</span>
-            <span><i style={{ background: 'var(--brand)' }} />Captured</span>
-          </div>
-        </section>
+        <CaptureLineChart metrics={metrics} />
       </div>
       <section className="panel">
         <div className="panel-head"><h2>Recent Wins</h2><span>Closed opportunities</span></div>
