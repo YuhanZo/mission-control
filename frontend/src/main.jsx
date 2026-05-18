@@ -47,7 +47,8 @@ function monthLabel(value) {
 
 function shortDate(value) {
   if (!value) return 'Not scheduled';
-  return new Date(`${value}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const iso = String(value).slice(0, 10);
+  return new Date(`${iso}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 function isoDate(date) {
@@ -1398,7 +1399,94 @@ function BidsView({ bids }) {
   );
 }
 
-function ReportsView() {
+function toCSV(cols, rows) {
+  const esc = (v) => { const s = v == null ? '' : String(v); return /[,"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+  return [cols.map((c) => esc(c.label)), ...rows.map((r) => cols.map((c) => esc(r[c.key])))].map((r) => r.join(',')).join('\n');
+}
+
+function downloadCSV(filename, csv) {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  Object.assign(document.createElement('a'), { href: url, download: filename }).click();
+  URL.revokeObjectURL(url);
+}
+
+function ReportsView({ projects = [], billings = [], bids = [], customers = [], installers = [] }) {
+  const exportFns = {
+    'Project Status Summary':     () => downloadCSV('project-status.csv', toCSV([
+      { label: 'Job #',          key: 'job_number' },
+      { label: 'Project',        key: 'project_name' },
+      { label: 'Company',        key: 'company_name' },
+      { label: 'Territory',      key: 'territory_name' },
+      { label: 'Status',         key: 'status' },
+      { label: 'Install Start',  key: 'install_start_date' },
+      { label: 'Install End',    key: 'install_end_date' },
+      { label: 'Contract Value', key: 'total_contract' },
+    ], projects)),
+    'Weekly Field Report':         () => downloadCSV('weekly-field-report.csv', toCSV([
+      { label: 'Project',       key: 'project_name' },
+      { label: 'Territory',     key: 'territory_name' },
+      { label: 'Status',        key: 'status' },
+      { label: 'Install Start', key: 'install_start_date' },
+      { label: 'Install End',   key: 'install_end_date' },
+    ], projects.filter((p) => p.status === 'active'))),
+    'Install Schedule Export':     () => downloadCSV('install-schedule.csv', toCSV([
+      { label: 'Job #',         key: 'job_number' },
+      { label: 'Project',       key: 'project_name' },
+      { label: 'Territory',     key: 'territory_name' },
+      { label: 'Install Start', key: 'install_start_date' },
+      { label: 'Install End',   key: 'install_end_date' },
+    ], projects)),
+    'Billing Cycle Summary':       () => downloadCSV('billing-cycle.csv', toCSV([
+      { label: 'Job #',             key: 'job_number' },
+      { label: 'Project',           key: 'project_name' },
+      { label: 'Company',           key: 'company_name' },
+      { label: 'Territory',         key: 'territory_name' },
+      { label: 'Billed This Month', key: 'bill_this_month' },
+      { label: 'Total Billed',      key: 'total_billed' },
+      { label: 'Remaining',         key: 'remaining_to_bill' },
+      { label: '% Complete',        key: 'percent_complete' },
+      { label: 'Invoice Sent',      key: 'invoice_sent' },
+      { label: 'QBO Invoice #',     key: 'qbo_invoice_number' },
+    ], billings)),
+    'Bid & Estimate Log':          () => downloadCSV('bid-log.csv', toCSV([
+      { label: 'Project',      key: 'project_name' },
+      { label: 'Company',      key: 'company_name' },
+      { label: 'Territory',    key: 'territory_name' },
+      { label: 'Bid Date',     key: 'bid_date' },
+      { label: 'Bid Amount',   key: 'bid_amount' },
+      { label: 'Est. GP',      key: 'estimated_gp' },
+      { label: 'Est. Hours',   key: 'estimated_hours' },
+      { label: 'Status',       key: 'bid_status' },
+      { label: 'Won',          key: 'won' },
+    ], bids)),
+    'Customer Contact Sheet':      () => downloadCSV('customers.csv', toCSV([
+      { label: 'Company',          key: 'company_name' },
+      { label: 'Territory',        key: 'territory_name' },
+      { label: 'Type',             key: 'company_type' },
+      { label: 'Contact',          key: 'contact_name' },
+      { label: 'Title',            key: 'contact_title' },
+      { label: 'Phone',            key: 'phone' },
+      { label: 'Active Projects',  key: 'active_projects' },
+      { label: 'Total Value',      key: 'total_value' },
+      { label: 'Last Interaction', key: 'last_interaction' },
+    ], customers)),
+    'Installer Efficiency Report': () => downloadCSV('installer-efficiency.csv', toCSV([
+      { label: 'Name',       key: 'name' },
+      { label: 'Territory',  key: 'territory_name' },
+      { label: 'YTD Hours',  key: 'ytd_hours' },
+      { label: 'Efficiency', key: 'efficiency_rating' },
+      { label: 'OT Hours',   key: 'overtime_hours' },
+      { label: 'Status',     key: 'status' },
+    ], installers)),
+    'Monthly KPI Summary':         () => downloadCSV('kpi-summary.csv', toCSV([
+      { label: 'Project',        key: 'project_name' },
+      { label: 'Territory',      key: 'territory_name' },
+      { label: 'Status',         key: 'status' },
+      { label: 'Contract Value', key: 'total_contract' },
+    ], projects)),
+  };
+
   const templates = [
     { title: 'Project Status Summary',     description: 'All active jobs with install dates, status, and billing progress.', group: 'Projects' },
     { title: 'Weekly Field Report',         description: 'Installer hours, on-site activity, and schedule variances.',        group: 'Projects' },
@@ -1413,10 +1501,10 @@ function ReportsView() {
   return (
     <>
       <section className="stats-grid" style={{ gridTemplateColumns: 'repeat(4,minmax(0,1fr))' }}>
-        <StatCard label="Report Templates"   value={templates.length} note="Ready to export" />
-        <StatCard label="Export Formats"     value="CSV / PDF"        note="Download anytime" />
-        <StatCard label="Last Export"        value="May 14"           note="Weekly Field Report" />
-        <StatCard label="Scheduled Reports"  value={2}               note="Auto-send Fridays" />
+        <StatCard label="Report Templates"  value={templates.length} note="Ready to export" />
+        <StatCard label="Export Format"     value="CSV"              note="Download anytime" />
+        <StatCard label="Last Export"       value="May 14"           note="Weekly Field Report" />
+        <StatCard label="Scheduled Reports" value={2}                note="Auto-send Fridays" />
       </section>
       {groups.map((group) => (
         <section key={group} className="panel" style={{ marginBottom: 18 }}>
@@ -1428,7 +1516,7 @@ function ReportsView() {
                   <strong style={{ display: 'block', marginBottom: 3 }}>{t.title}</strong>
                   <small style={{ color: 'var(--muted)' }}>{t.description}</small>
                 </div>
-                <button type="button" style={{ fontSize: 12, padding: '7px 14px', whiteSpace: 'nowrap', background: 'var(--brand)' }}>Export CSV</button>
+                <button type="button" onClick={exportFns[t.title]} style={{ fontSize: 12, padding: '7px 14px', whiteSpace: 'nowrap', background: 'var(--brand)' }}>Export CSV</button>
               </div>
             ))}
           </div>
@@ -1442,8 +1530,9 @@ function ReportsView() {
 
 function ProjectManagerDashboard({ user }) {
   const [activeView, setActiveView] = useState('dashboard');
-  const lockedArea = user.territoryId ? Number(user.territoryId) : 0;
-  const [areaId, setAreaId] = useState(lockedArea || 0);
+  const canSwitchTerritory = !['installer', 'estimator'].includes(user.role);
+  const lockedArea = (!canSwitchTerritory && user.territoryId) ? Number(user.territoryId) : 0;
+  const [areaId, setAreaId] = useState(user.territoryId ? Number(user.territoryId) : 0);
   const [apiDashboard, setApiDashboard] = useState(null);
   const [loadingApi, setLoadingApi] = useState(false);
   const dashboard = normalizeDashboard(apiDashboard, areaId);
@@ -1549,7 +1638,7 @@ function ProjectManagerDashboard({ user }) {
         {activeView === 'customers'  && <CustomersView   key={areaId} customers={filteredCustomers} />}
         {activeView === 'bids'       && <BidsView        key={areaId} bids={filteredBids} />}
         {activeView === 'inventory'  && <MaterialBoard key={areaId} />}
-        {activeView === 'reports'    && <ReportsView     key={areaId} />}
+        {activeView === 'reports'    && <ReportsView key={areaId} projects={dashboard.projects || []} billings={filteredBillings} bids={filteredBids} customers={filteredCustomers} installers={filteredInstallers} />}
         {activeView === 'messages'   && <PlaceholderView key={areaId} title="Messages"  icon="💬" description="Team messaging and client communication threads coming soon." />}
         {activeView === 'documents'  && <PlaceholderView key={areaId} title="Documents" icon="📄" description="Contract storage, submittals, and closeout packages coming soon." />}
         {activeView === 'alerts'     && <PlaceholderView key={areaId} title="Alerts"    icon="🔔" description="Smart notifications for overdue invoices, schedule conflicts, and OT flags." />}
