@@ -1484,10 +1484,11 @@ function ProjectManagerDashboard({ user }) {
     return role.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   }
 
-  async function refreshFromApi() {
+  async function refreshFromApi(territory) {
     setLoadingApi(true);
     try {
-      const response = await fetch('/api/dashboard', { credentials: 'include' });
+      const url = territory ? `/api/dashboard?territory=${territory}` : '/api/dashboard';
+      const response = await fetch(url, { credentials: 'include' });
       if (!response.ok) return;
       const body = await response.json();
       setApiDashboard(body.dashboards?.projectManager || null);
@@ -1496,7 +1497,7 @@ function ProjectManagerDashboard({ user }) {
     }
   }
 
-  useEffect(() => { if (!user.demo) refreshFromApi(); }, []);
+  useEffect(() => { if (!user.demo) refreshFromApi(areaId || null); }, [areaId]);
 
   return (
     <div className="app-shell">
