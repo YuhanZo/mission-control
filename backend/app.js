@@ -8,6 +8,7 @@ const dashboardRoutes   = require('./routes/dashboardRoutes');
 const subprojectRoutes  = require('./routes/subprojectRoutes');
 const installerRoutes   = require('./routes/installerRoutes');
 const materialRoutes    = require('./routes/materialRoutes');
+const userRoutes        = require('./routes/userRoutes');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -36,10 +37,10 @@ app.use('/api',           dashboardRoutes);
 app.use('/api',           subprojectRoutes);
 app.use('/api',           installerRoutes);
 app.use('/api',           materialRoutes);
+app.use('/api/users',     userRoutes);
 
 // TODO: mount as modules are built
 // app.use('/api/projects',  projectRoutes);
-// app.use('/api/users',     userRoutes);
 // app.use('/api/materials', materialRoutes);
 // app.use('/api/schedule',  scheduleRoutes);
 // app.use('/api/punch',     punchRoutes);
