@@ -865,11 +865,11 @@ function DailyView({ projects }) {
 
   const active = projects.filter((p) => {
     if (!p.install_start_date || !p.install_end_date) return false;
-    return p.install_start_date <= key && p.install_end_date >= key;
+    return p.install_start_date.slice(0, 10) <= key && p.install_end_date.slice(0, 10) >= key;
   });
 
-  const starting = projects.filter((p) => p.install_start_date === key);
-  const ending   = projects.filter((p) => p.install_end_date   === key);
+  const starting = projects.filter((p) => p.install_start_date?.slice(0, 10) === key);
+  const ending   = projects.filter((p) => p.install_end_date?.slice(0, 10)   === key);
 
   function move(days) {
     const d = new Date(anchor);
