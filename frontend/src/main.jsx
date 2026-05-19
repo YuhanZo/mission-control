@@ -1127,7 +1127,7 @@ function LegacyCalendar({ projects }) {
         <div className="calendar-grid">
           {days.map((day) => {
             const k = isoDate(day);
-            const dayEvents = events.filter((e) => e.date === k);
+            const dayEvents = events.filter((e) => e.date.slice(0, 10) === k);
             return (
               <div className={day.getMonth() === anchor.getMonth() ? 'day' : 'day muted-day'} key={k}>
                 <strong>{day.getDate()}</strong>
