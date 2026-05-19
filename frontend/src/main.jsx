@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 
@@ -110,6 +110,16 @@ const statusLabels = {
 
 function currency(value) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(Number(value || 0));
+}
+
+function initials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  return parts.length >= 2 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : parts[0].slice(0, 2).toUpperCase();
+}
+function formatRole(role) {
+  if (!role) return 'User';
+  return role.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
 function projectContractValue(project) {
@@ -468,6 +478,215 @@ function FinancialDashboard({ dashboard }) {
         <FinancialSide dashboard={dashboard} />
         <BarChart title="Bid Dollars Sent" subtitle="monthly estimating activity" data={dashboard.monthlyMetrics || demoMetrics} valueKey="total_bid_value" />
       </section>
+    </div>
+  );
+}
+
+function ProfileEditPanel({ user, onUpdateUser, onClose }) {
+  const COLORS = ['var(--brand)', 'var(--gold)', 'var(--green)', 'var(--orange)', '#7c3aed', '#e11d48'];
+  const [form, setForm] = useState({
+    name:           user.name           || '',
+    preferred_name: user.preferred_name || '',
+    email:          user.email          || '',
+    phone:          user.phone          || '',
+    avatar_url:     user.avatar_url     || '',
+    avatar_color:   user.avatar_color   || COLORS[0],
+  });
+  const [pwOpen, setPwOpen] = useState(false);
+  const [pw, setPw]         = useState({ current: '', next: '', confirm: '' });
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg]       = useState({ text: '', ok: true });
+  const fileRef = useRef(null);
+
+  function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => setForm((f) => ({ ...f, avatar_url: ev.target.result }));
+    reader.readAsDataURL(file);
+  }
+  function field(key) { return (e) => setForm((f) => ({ ...f, [key]: e.target.value })); }
+
+  async function saveProfile(e) {
+    e.preventDefault();
+    setSaving(true);
+    setMsg({ text: '', ok: true });
+    try {
+      const updates = {
+        name:           form.name.trim()           || user.name,
+        preferred_name: form.preferred_name.trim(),
+        email:          form.email.trim(),
+        phone:          form.phone.trim(),
+        avatar_url:     form.avatar_url,
+        avatar_color:   form.avatar_color,
+      };
+      localStorage.setItem(`profile_ext_${user.id}`, JSON.stringify(updates));
+      if (!user.demo) {
+        const r = await fetch('/api/auth/profile', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ name: updates.name, email: updates.email }),
+        });
+        if (!r.ok) {
+          const b = await r.json();
+          setMsg({ text: b.error || 'Error saving.', ok: false });
+          setSaving(false);
+          return;
+        }
+      }
+      onUpdateUser(updates);
+      setMsg({ text: 'Profile saved!', ok: true });
+    } catch {
+      setMsg({ text: 'Error saving profile.', ok: false });
+    }
+    setSaving(false);
+  }
+
+  async function changePassword(e) {
+    e.preventDefault();
+    if (user.demo) { setMsg({ text: 'Password change requires a real account.', ok: false }); return; }
+    if (pw.next !== pw.confirm) { setMsg({ text: 'New passwords do not match.', ok: false }); return; }
+    if (pw.next.length < 8) { setMsg({ text: 'Password must be at least 8 characters.', ok: false }); return; }
+    setSaving(true);
+    setMsg({ text: '', ok: true });
+    try {
+      const r = await fetch('/api/auth/profile/password', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ current: pw.current, next: pw.next }),
+      });
+      const b = await r.json();
+      if (r.ok) {
+        setMsg({ text: 'Password updated.', ok: true });
+        setPw({ current: '', next: '', confirm: '' });
+        setPwOpen(false);
+      } else {
+        setMsg({ text: b.error || 'Error updating password.', ok: false });
+      }
+    } catch {
+      setMsg({ text: 'Error updating password.', ok: false });
+    }
+    setSaving(false);
+  }
+
+  const displayName = form.preferred_name || form.name;
+
+  return (
+    <div className="detail-overlay" onClick={onClose}>
+      <div className="detail-panel" onClick={(e) => e.stopPropagation()} style={{ width: 'min(520px, 96vw)' }}>
+        <div className="detail-header">
+          <div className="profile-avatar-wrap" onClick={() => fileRef.current?.click()} title="Click to change photo">
+            {form.avatar_url
+              ? <img src={form.avatar_url} style={{ width: 72, height: 72, borderRadius: '50%', objectFit: 'cover' }} alt="" />
+              : <div className="profile-avatar-large" style={{ background: form.avatar_color }}>{initials(displayName)}</div>
+            }
+            <div className="profile-avatar-overlay">📷</div>
+            <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFile} />
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2 style={{ margin: '0 0 4px', fontSize: 20 }}>{displayName || 'Your Profile'}</h2>
+            <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 6 }}>{formatRole(user.role)}</div>
+            {user.demo && (
+              <span style={{ fontSize: 11, background: '#fef9c3', color: '#92400e', padding: '3px 9px', borderRadius: 4, fontWeight: 600 }}>
+                Demo — changes saved locally only
+              </span>
+            )}
+          </div>
+          <button className="close-btn" onClick={onClose} style={{ alignSelf: 'flex-start' }}>✕</button>
+        </div>
+
+        <div style={{ padding: '14px 24px', borderBottom: '1px solid var(--line)' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8 }}>Avatar color</div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            {COLORS.map((c) => (
+              <button key={c} type="button"
+                onClick={() => setForm((f) => ({ ...f, avatar_color: c, avatar_url: '' }))}
+                style={{ width: 28, height: 28, borderRadius: '50%', border: 'none', cursor: 'pointer', background: c,
+                  outline: form.avatar_color === c && !form.avatar_url ? '3px solid #334155' : '2px solid transparent',
+                  outlineOffset: 2, transition: 'outline .12s' }} />
+            ))}
+            {form.avatar_url && (
+              <button type="button" onClick={() => setForm((f) => ({ ...f, avatar_url: '' }))}
+                style={{ marginLeft: 8, background: 'none', border: 'none', color: 'var(--red)', fontSize: 12, fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
+                Remove photo
+              </button>
+            )}
+          </div>
+        </div>
+
+        <form onSubmit={saveProfile} style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div className="profile-field-row">
+            <div className="profile-field">
+              <label>Display name</label>
+              <input value={form.name} onChange={field('name')} placeholder="Full name" required />
+            </div>
+            <div className="profile-field">
+              <label>Preferred name <span style={{ color: 'var(--muted)', fontWeight: 400, textTransform: 'none' }}>(optional)</span></label>
+              <input value={form.preferred_name} onChange={field('preferred_name')} placeholder="Nickname or short name" />
+            </div>
+          </div>
+          <div className="profile-field-row">
+            <div className="profile-field">
+              <label>Email address</label>
+              <input type="email" value={form.email} onChange={field('email')} placeholder="you@jamesblinds.com" required />
+            </div>
+            <div className="profile-field">
+              <label>Phone</label>
+              <input type="tel" value={form.phone} onChange={field('phone')} placeholder="555-000-0000" />
+            </div>
+          </div>
+          <div className="profile-field">
+            <label>Role</label>
+            <input value={formatRole(user.role)} readOnly style={{ background: 'var(--bg)', color: 'var(--muted)', cursor: 'default' }} />
+          </div>
+          {msg.text && (
+            <div style={{ padding: '8px 12px', borderRadius: 6, fontSize: 13, fontWeight: 600,
+              background: msg.ok ? '#f0fdf4' : '#fef2f2', color: msg.ok ? 'var(--green)' : '#dc2626' }}>
+              {msg.text}
+            </div>
+          )}
+          <button type="submit" disabled={saving}
+            style={{ padding: 11, background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 7, fontWeight: 700, fontSize: 14, cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.7 : 1 }}>
+            {saving ? 'Saving…' : 'Save changes'}
+          </button>
+        </form>
+
+        <div style={{ padding: '0 24px 24px', borderTop: '1px solid var(--line)' }}>
+          <button type="button" onClick={() => setPwOpen((v) => !v)}
+            style={{ background: 'none', border: 'none', color: 'var(--brand)', fontWeight: 700, fontSize: 13, cursor: 'pointer', padding: '14px 0 0', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 10 }}>{pwOpen ? '▲' : '▼'}</span> Change password
+          </button>
+          {pwOpen && (
+            <form onSubmit={changePassword} style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {user.demo && (
+                <div style={{ fontSize: 12, color: 'var(--muted)', background: 'var(--bg)', padding: '7px 11px', borderRadius: 6 }}>
+                  Not available in demo mode.
+                </div>
+              )}
+              <div className="profile-field">
+                <label>Current password</label>
+                <input type="password" value={pw.current} onChange={(e) => setPw((p) => ({ ...p, current: e.target.value }))} disabled={user.demo} />
+              </div>
+              <div className="profile-field-row">
+                <div className="profile-field">
+                  <label>New password</label>
+                  <input type="password" value={pw.next} onChange={(e) => setPw((p) => ({ ...p, next: e.target.value }))} disabled={user.demo} />
+                </div>
+                <div className="profile-field">
+                  <label>Confirm new password</label>
+                  <input type="password" value={pw.confirm} onChange={(e) => setPw((p) => ({ ...p, confirm: e.target.value }))} disabled={user.demo} />
+                </div>
+              </div>
+              <button type="submit" disabled={saving || user.demo}
+                style={{ padding: '9px 16px', background: user.demo ? '#94a3b8' : 'var(--brand)', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 700, fontSize: 13, cursor: user.demo ? 'default' : 'pointer' }}>
+                Update password
+              </button>
+            </form>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -1434,8 +1653,9 @@ function ReportsView() {
 
 // ─── ProjectManagerDashboard ───────────────────────────────────────────────
 
-function ProjectManagerDashboard({ user }) {
-  const [activeView, setActiveView] = useState('dashboard');
+function ProjectManagerDashboard({ user, onUpdateUser }) {
+  const [activeView,  setActiveView]  = useState('dashboard');
+  const [showProfile, setShowProfile] = useState(false);
   const lockedArea = user.territoryId ? Number(user.territoryId) : 0;
   const [areaId, setAreaId] = useState(lockedArea || 0);
   const [apiDashboard, setApiDashboard] = useState(null);
@@ -1503,12 +1723,16 @@ function ProjectManagerDashboard({ user }) {
         {navUtil.map(([id, label]) => (
           <button key={id} className={activeView === id ? 'nav-active' : ''} onClick={() => setActiveView(id)} type="button">{label}</button>
         ))}
-        <div className="user-card">
-          <div className="user-avatar">{initials(user.name)}</div>
+        <div className="user-card user-card-btn" onClick={() => setShowProfile(true)} role="button" tabIndex={0}>
+          {user.avatar_url
+            ? <img src={user.avatar_url} className="user-avatar-img" alt="" />
+            : <div className="user-avatar" style={user.avatar_color ? { background: user.avatar_color } : {}}>{initials(user.preferred_name || user.name)}</div>
+          }
           <div className="user-info">
-            <strong>{user.name}</strong>
+            <strong>{user.preferred_name || user.name}</strong>
             <span>{formatRole(user.role)}</span>
           </div>
+          <span className="user-edit-icon">✎</span>
         </div>
       </aside>
 
@@ -1548,6 +1772,7 @@ function ProjectManagerDashboard({ user }) {
         {activeView === 'alerts'     && <PlaceholderView key={areaId} title="Alerts"    icon="🔔" description="Smart notifications for overdue invoices, schedule conflicts, and OT flags." />}
         {activeView === 'settings'   && <PlaceholderView key={areaId} title="Settings"  icon="⚙️" description="User preferences, territory assignments, and notification settings coming soon." />}
       </main>
+      {showProfile && <ProfileEditPanel user={user} onUpdateUser={onUpdateUser} onClose={() => setShowProfile(false)} />}
     </div>
   );
 }
@@ -2651,9 +2876,10 @@ function ChiefFinancials() {
 
 // ─── ChiefEstimatorDashboard ────────────────────────────────────────────────
 
-function ChiefEstimatorDashboard({ user }) {
+function ChiefEstimatorDashboard({ user, onUpdateUser }) {
   const [activeView,   setActiveView]   = useState('dashboard');
   const [selectedEst,  setSelectedEst]  = useState(null);
+  const [showProfile,  setShowProfile]  = useState(false);
 
   const navGroups = [
     { label: 'OVERVIEW',  items: [['dashboard', 'Dashboard'], ['performance', 'Performance Board']] },
@@ -2691,9 +2917,13 @@ function ChiefEstimatorDashboard({ user }) {
         {navUtil.map(([id, label]) => (
           <button key={id} className={activeView === id ? 'nav-active' : ''} onClick={() => setActiveView(id)} type="button">{label}</button>
         ))}
-        <div className="user-card">
-          <div className="user-avatar">{initials(user.name)}</div>
-          <div className="user-info"><strong>{user.name}</strong><span>{formatRole(user.role)}</span></div>
+        <div className="user-card user-card-btn" onClick={() => setShowProfile(true)} role="button" tabIndex={0}>
+          {user.avatar_url
+            ? <img src={user.avatar_url} className="user-avatar-img" alt="" />
+            : <div className="user-avatar" style={user.avatar_color ? { background: user.avatar_color } : {}}>{initials(user.preferred_name || user.name)}</div>
+          }
+          <div className="user-info"><strong>{user.preferred_name || user.name}</strong><span>{formatRole(user.role)}</span></div>
+          <span className="user-edit-icon">✎</span>
         </div>
       </aside>
 
@@ -2724,14 +2954,16 @@ function ChiefEstimatorDashboard({ user }) {
 
         {selectedEst && <EstimatorProfilePanel estimator={selectedEst} onClose={() => setSelectedEst(null)} />}
       </main>
+      {showProfile && <ProfileEditPanel user={user} onUpdateUser={onUpdateUser} onClose={() => setShowProfile(false)} />}
     </div>
   );
 }
 
 // ─── EstimatorDashboard ────────────────────────────────────────────────────
 
-function EstimatorDashboard({ user }) {
-  const [activeView, setActiveView] = useState('dashboard');
+function EstimatorDashboard({ user, onUpdateUser }) {
+  const [activeView,  setActiveView]  = useState('dashboard');
+  const [showProfile, setShowProfile] = useState(false);
   const lockedArea  = user.territoryId ? Number(user.territoryId) : 0;
   const [areaId, setAreaId] = useState(lockedArea || 0);
 
@@ -2782,12 +3014,16 @@ function EstimatorDashboard({ user }) {
         {navUtil.map(([id, label]) => (
           <button key={id} className={activeView === id ? 'nav-active' : ''} onClick={() => setActiveView(id)} type="button">{label}</button>
         ))}
-        <div className="user-card">
-          <div className="user-avatar">{initials(user.name)}</div>
+        <div className="user-card user-card-btn" onClick={() => setShowProfile(true)} role="button" tabIndex={0}>
+          {user.avatar_url
+            ? <img src={user.avatar_url} className="user-avatar-img" alt="" />
+            : <div className="user-avatar" style={user.avatar_color ? { background: user.avatar_color } : {}}>{initials(user.preferred_name || user.name)}</div>
+          }
           <div className="user-info">
-            <strong>{user.name}</strong>
+            <strong>{user.preferred_name || user.name}</strong>
             <span>{formatRole(user.role)}</span>
           </div>
+          <span className="user-edit-icon">✎</span>
         </div>
       </aside>
 
@@ -2827,6 +3063,7 @@ function EstimatorDashboard({ user }) {
         {activeView === 'alerts'      && <PlaceholderView         key={areaId} title="Alerts"    icon="🔔" description="Underpriced job flags, missing measurements, and deadline alerts coming soon." />}
         {activeView === 'settings'    && <PlaceholderView         key={areaId} title="Settings"  icon="⚙️" description="User preferences, territory assignments, and notification settings coming soon." />}
       </main>
+      {showProfile && <ProfileEditPanel user={user} onUpdateUser={onUpdateUser} onClose={() => setShowProfile(false)} />}
     </div>
   );
 }
@@ -3144,10 +3381,11 @@ function ExecOperations({ projects }) {
   );
 }
 
-function ExecutiveDashboard({ user }) {
+function ExecutiveDashboard({ user, onUpdateUser }) {
   const [activeView,  setActiveView]  = useState('overview');
   const [areaId,      setAreaId]      = useState(0);
   const [selectedEst, setSelectedEst] = useState(null);
+  const [showProfile, setShowProfile] = useState(false);
 
   const tName              = areaId ? territoryNames[areaId] : null;
   const filteredProjects   = tName ? demoProjects.filter((p) => p.territory_name === tName) : demoProjects;
@@ -3176,9 +3414,13 @@ function ExecutiveDashboard({ user }) {
         {navUtil.map(([id, label]) => (
           <button key={id} className={activeView === id ? 'nav-active' : ''} onClick={() => setActiveView(id)} type="button">{label}</button>
         ))}
-        <div className="user-card">
-          <div className="user-avatar">{initials(user.name)}</div>
-          <div className="user-info"><strong>{user.name}</strong><span>Executive</span></div>
+        <div className="user-card user-card-btn" onClick={() => setShowProfile(true)} role="button" tabIndex={0}>
+          {user.avatar_url
+            ? <img src={user.avatar_url} className="user-avatar-img" alt="" />
+            : <div className="user-avatar" style={user.avatar_color ? { background: user.avatar_color } : {}}>{initials(user.preferred_name || user.name)}</div>
+          }
+          <div className="user-info"><strong>{user.preferred_name || user.name}</strong><span>Executive</span></div>
+          <span className="user-edit-icon">✎</span>
         </div>
       </aside>
 
@@ -3206,17 +3448,23 @@ function ExecutiveDashboard({ user }) {
 
         {selectedEst && <EstimatorProfilePanel estimator={selectedEst} onClose={() => setSelectedEst(null)} />}
       </main>
+      {showProfile && <ProfileEditPanel user={user} onUpdateUser={onUpdateUser} onClose={() => setShowProfile(false)} />}
     </div>
   );
 }
 
 function App() {
   const [user, setUser] = useState(null);
-  if (!user) return <LoginScreen onLogin={setUser} />;
-  if (user.role === 'executive')       return <ExecutiveDashboard      user={user} />;
-  if (user.role === 'chief_estimator') return <ChiefEstimatorDashboard user={user} />;
-  if (user.role === 'estimator')       return <EstimatorDashboard      user={user} />;
-  return <ProjectManagerDashboard user={user} />;
+  function handleLogin(u) {
+    const stored = JSON.parse(localStorage.getItem(`profile_ext_${u.id}`) || '{}');
+    setUser({ ...u, ...stored });
+  }
+  const onUpdateUser = (updates) => setUser((u) => ({ ...u, ...updates }));
+  if (!user) return <LoginScreen onLogin={handleLogin} />;
+  if (user.role === 'executive')       return <ExecutiveDashboard      user={user} onUpdateUser={onUpdateUser} />;
+  if (user.role === 'chief_estimator') return <ChiefEstimatorDashboard user={user} onUpdateUser={onUpdateUser} />;
+  if (user.role === 'estimator')       return <EstimatorDashboard      user={user} onUpdateUser={onUpdateUser} />;
+  return <ProjectManagerDashboard user={user} onUpdateUser={onUpdateUser} />;
 }
 
 createRoot(document.getElementById('root')).render(<App />);

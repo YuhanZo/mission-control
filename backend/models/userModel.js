@@ -22,6 +22,24 @@ const UserModel = {
     );
     return rows[0] || null;
   },
+
+  async updateProfile(id, { name, email }) {
+    await db.query(
+      `UPDATE users
+          SET name       = COALESCE($1, name),
+              email      = COALESCE($2, email),
+              updated_at = NOW()
+        WHERE id = $3`,
+      [name || null, email || null, id]
+    );
+  },
+
+  async updatePassword(id, hash) {
+    await db.query(
+      `UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2`,
+      [hash, id]
+    );
+  },
 };
 
 module.exports = UserModel;
