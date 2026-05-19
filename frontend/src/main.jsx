@@ -1108,6 +1108,10 @@ function LegacyCalendar({ projects }) {
     p.completion_date    && { date: p.completion_date,    type: 'Complete',      project: p },
   ].filter(Boolean));
 
+  const monthStr    = `${anchor.getFullYear()}-${String(anchor.getMonth() + 1).padStart(2, '0')}`;
+  const monthEvents = events.filter((ev) => ev.date.slice(0, 7) === monthStr).sort((a, b) => a.date.localeCompare(b.date));
+  const monthLabel  = anchor.toLocaleDateString('en-US', { month: 'long' });
+
   return (
     <section className="calendar-layout">
       <div className="panel calendar-board">
@@ -1138,9 +1142,15 @@ function LegacyCalendar({ projects }) {
         </div>
       </div>
       <section className="panel agenda-panel">
-        <div className="panel-head"><h2>Calendar List</h2><span>{events.length} milestones</span></div>
+        <div className="panel-head">
+          <h2>Calendar List</h2>
+          <span>{monthEvents.length} milestones in {monthLabel}</span>
+        </div>
         <div className="agenda-list">
-          {events.sort((a, b) => a.date.localeCompare(b.date)).map((ev) => (
+          {monthEvents.length === 0 && (
+            <div style={{ padding: '20px 18px', color: 'var(--muted)', fontSize: 13 }}>No milestones in {monthLabel}.</div>
+          )}
+          {monthEvents.map((ev) => (
             <div className="agenda-item" key={`${ev.date}-${ev.type}-${ev.project.id}`}>
               <span className="badge badge-active">{ev.type}</span>
               <div><strong>{ev.project.project_name}</strong><small>{shortDate(ev.date)} · {getAreaName(ev.project.territory_id, ev.project.territory_name)}</small></div>
