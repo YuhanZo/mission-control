@@ -82,7 +82,8 @@ CREATE TABLE IF NOT EXISTS project_users (
   project_id        INTEGER REFERENCES projects(id) ON DELETE CASCADE,
   user_id           INTEGER REFERENCES users(id) ON DELETE CASCADE,
   relationship_type VARCHAR,
-  created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  created_at        TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (project_id, user_id)
 );
 
 -- Compatibility upgrades for databases created from the earlier MVP schema.

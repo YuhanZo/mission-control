@@ -29,11 +29,11 @@ const userController = {
 
   async update(req, res, next) {
     try {
-      const { name, email, phone, role_id } = req.body;
+      const { name, email, phone, role_id, territory_id } = req.body;
       if (!name || !email) {
         return res.status(400).json({ error: 'name and email are required.' });
       }
-      const user = await UserModel.update(req.params.id, { name, email, phone, role_id });
+      const user = await UserModel.update(req.params.id, { name, email, phone, role_id, territory_id });
       if (!user) return res.status(404).json({ error: 'User not found.' });
       res.json({ user });
     } catch (err) {

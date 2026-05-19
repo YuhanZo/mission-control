@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 
@@ -474,8 +474,8 @@ function FinancialDashboard({ dashboard }) {
 }
 
 function LoginScreen({ onLogin }) {
-  const [email, setEmail] = useState('maya.pm@jamesblinds.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -494,17 +494,7 @@ function LoginScreen({ onLogin }) {
       if (!response.ok) throw new Error(body.error || 'Unable to log in.');
       onLogin(body.user);
     } catch (err) {
-      const isChief = /chief|chiefest|chief_est/i.test(email);
-      const isEst   = !isChief && /\.est[@.]|estimat/i.test(email);
-      setError(`${err.message} Showing demo data.`);
-      onLogin({
-        id: 'demo',
-        name: isChief ? 'Sarah Mitchell' : isEst ? 'Alex Chen' : 'Maya Johnson',
-        email,
-        role: isChief ? 'chief_estimator' : isEst ? 'estimator' : 'project_manager',
-        territoryId: isChief ? 0 : 1,
-        demo: true,
-      });
+      setError(err.message || 'Invalid email or password.');
     } finally {
       setLoading(false);
     }
@@ -523,9 +513,6 @@ function LoginScreen({ onLogin }) {
         <label>
           Email
           <input value={email} onChange={(event) => setEmail(event.target.value)} />
-          <small style={{ color: 'var(--muted)', fontWeight: 400, marginTop: 4, display: 'block' }}>
-            Demo: <code>maya.pm@jamesblinds.com</code> · PM &nbsp;|&nbsp; <code>alex.est@jamesblinds.com</code> · Estimator &nbsp;|&nbsp; <code>sarah.chiefest@jamesblinds.com</code> · Chief Est.
-          </small>
         </label>
         <label>Password<input type="password" value={password} onChange={(event) => setPassword(event.target.value)} /></label>
         {error && <div className="error">{error}</div>}
@@ -860,70 +847,176 @@ function MonthlyGantt({ projects, subprojects }) {
 // ─── Scheduling: Daily View ──────────────────────────────────────────────────
 
 function DailyView({ projects }) {
-  const [anchor, setAnchor] = useState(new Date());
-  const key = isoDate(anchor);
-
-  const active = projects.filter((p) => {
-    if (!p.install_start_date || !p.install_end_date) return false;
-    return p.install_start_date.slice(0, 10) <= key && p.install_end_date.slice(0, 10) >= key;
+  const today = new Date();
+  // anchor = Monday of the displayed week
+  const [anchor, setAnchor] = useState(() => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); // Monday
+    d.setHours(0, 0, 0, 0);
+    return d;
   });
 
-  const starting = projects.filter((p) => p.install_start_date?.slice(0, 10) === key);
-  const ending   = projects.filter((p) => p.install_end_date?.slice(0, 10)   === key);
-
-  function move(days) {
+  const DAYS = 14; // two weeks
+  const days = Array.from({ length: DAYS }, (_, i) => {
     const d = new Date(anchor);
-    d.setDate(d.getDate() + days);
+    d.setDate(anchor.getDate() + i);
+    return d;
+  });
+  const todayStr = isoDate(today);
+
+  function prevWeek() { const d = new Date(anchor); d.setDate(d.getDate() - 7); setAnchor(d); }
+  function nextWeek() { const d = new Date(anchor); d.setDate(d.getDate() + 7); setAnchor(d); }
+  function goToday()  {
+    const d = new Date(today);
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    d.setHours(0, 0, 0, 0);
     setAnchor(d);
   }
 
+  const rangeStart = isoDate(days[0]);
+  const rangeEnd   = isoDate(days[DAYS - 1]);
+
+  // projects that overlap the visible range
+  const visible = projects.filter((p) => {
+    if (!p.install_start_date || !p.install_end_date) return true; // show TBD rows
+    return p.install_start_date.slice(0, 10) <= rangeEnd &&
+           p.install_end_date.slice(0, 10)   >= rangeStart;
+  });
+
+  // week label helper
+  const weekLabel = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+  // color by status
+  const STATUS_COLOR = { active: 'var(--brand)', pending: '#e09c4a', complete: '#2a9d8f', cancelled: '#aaa' };
+
+  const LABEL_W = 180;
+  const COL_W   = 52;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div className="panel" style={{ padding: '14px 20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button type="button" onClick={() => move(-1)}>← Prev</button>
-          <h2 style={{ margin: 0, fontSize: 18 }}>
-            {anchor.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
-          </h2>
-          <button type="button" onClick={() => setAnchor(new Date())}>Today</button>
-          <button type="button" onClick={() => move(1)}>Next →</button>
+    <div className="panel" style={{ overflow: 'auto' }}>
+      {/* nav bar */}
+      <div className="panel-head" style={{ position: 'sticky', left: 0 }}>
+        <h2>
+          Week of {weekLabel(days[0])} — {weekLabel(days[DAYS - 1])}
+          <span style={{ fontWeight: 400, fontSize: 13, color: 'var(--muted)', marginLeft: 12 }}>
+            {visible.filter((p) => p.install_start_date).length} active projects
+          </span>
+        </h2>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button type="button" onClick={prevWeek}>← Prev</button>
+          <button type="button" onClick={goToday}>This week</button>
+          <button type="button" onClick={nextWeek}>Next →</button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16 }}>
-        <section className="panel">
-          <div className="panel-head"><h2>Active On Site</h2><span>{active.length} jobs</span></div>
-          {active.length === 0 && <p style={{ padding: '12px 18px', color: 'var(--muted)', fontSize: 13 }}>No active installs</p>}
-          {active.map((p) => (
-            <div key={p.id} style={{ padding: '10px 18px', borderBottom: '1px solid var(--line)' }}>
-              <strong style={{ display: 'block', fontSize: 13 }}>{p.project_name}</strong>
-              <small style={{ color: 'var(--muted)' }}>{getAreaName(p.territory_id, p.territory_name)} · through {shortDate(p.install_end_date)}</small>
-            </div>
-          ))}
-        </section>
-
-        <section className="panel">
-          <div className="panel-head"><h2>Starting Today</h2><span>{starting.length}</span></div>
-          {starting.length === 0 && <p style={{ padding: '12px 18px', color: 'var(--muted)', fontSize: 13 }}>None</p>}
-          {starting.map((p) => (
-            <div key={p.id} style={{ padding: '10px 18px', borderBottom: '1px solid var(--line)' }}>
-              <strong style={{ display: 'block', fontSize: 13 }}>{p.project_name}</strong>
-              <small style={{ color: 'var(--green)' }}>Install begins · {currency(projectContractValue(p))}</small>
-            </div>
-          ))}
-        </section>
-
-        <section className="panel">
-          <div className="panel-head"><h2>Wrapping Up</h2><span>{ending.length}</span></div>
-          {ending.length === 0 && <p style={{ padding: '12px 18px', color: 'var(--muted)', fontSize: 13 }}>None</p>}
-          {ending.map((p) => (
-            <div key={p.id} style={{ padding: '10px 18px', borderBottom: '1px solid var(--line)' }}>
-              <strong style={{ display: 'block', fontSize: 13 }}>{p.project_name}</strong>
-              <small style={{ color: 'var(--muted)' }}>Install end date</small>
-            </div>
-          ))}
-        </section>
-      </div>
+      <table style={{ borderCollapse: 'collapse', width: '100%', tableLayout: 'fixed' }}>
+        <colgroup>
+          <col style={{ width: LABEL_W }} />
+          {days.map((d) => <col key={isoDate(d)} style={{ width: COL_W }} />)}
+        </colgroup>
+        <thead>
+          {/* week headers */}
+          <tr style={{ background: 'var(--bg)' }}>
+            <th style={{ borderBottom: '1px solid var(--line)', padding: '6px 14px', textAlign: 'left' }} />
+            {[0, 7].map((offset) => (
+              <th key={offset} colSpan={7}
+                style={{ borderBottom: '1px solid var(--line)', borderLeft: '2px solid var(--line)', padding: '5px 8px',
+                  fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', textAlign: 'left' }}>
+                Week of {weekLabel(days[offset])}
+              </th>
+            ))}
+          </tr>
+          {/* day headers */}
+          <tr style={{ background: 'var(--bg)' }}>
+            <th style={{ padding: '6px 14px', textAlign: 'left', fontSize: 11, fontWeight: 700,
+              color: 'var(--muted)', textTransform: 'uppercase', borderBottom: '2px solid var(--line)' }}>
+              Project
+            </th>
+            {days.map((d) => {
+              const str = isoDate(d);
+              const isToday = str === todayStr;
+              const isMon = d.getDay() === 1;
+              return (
+                <th key={str} style={{
+                  padding: '4px 2px', textAlign: 'center',
+                  borderBottom: '2px solid var(--line)',
+                  borderLeft: isMon ? '2px solid var(--line)' : '1px solid color-mix(in srgb, var(--line) 50%, transparent)',
+                  background: isToday ? 'color-mix(in srgb, var(--brand) 10%, transparent)' : undefined,
+                  minWidth: COL_W,
+                }}>
+                  <div style={{ fontSize: 9, color: 'var(--muted)', textTransform: 'uppercase' }}>
+                    {d.toLocaleDateString('en-US', { weekday: 'short' })}
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: isToday ? 700 : 500, color: isToday ? 'var(--brand)' : 'var(--ink)' }}>
+                    {d.getDate()}
+                  </div>
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {visible.length === 0 && (
+            <tr><td colSpan={DAYS + 1} style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>No projects with install dates in this range.</td></tr>
+          )}
+          {visible.map((p) => {
+            const startStr = p.install_start_date?.slice(0, 10);
+            const endStr   = p.install_end_date?.slice(0, 10);
+            const color    = STATUS_COLOR[p.status] || 'var(--brand)';
+            return (
+              <tr key={p.id} style={{ borderBottom: '1px solid var(--line)' }}>
+                {/* label */}
+                <td style={{ padding: '8px 14px', position: 'sticky', left: 0, background: 'var(--surface)', zIndex: 1 }}>
+                  <div style={{ fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: LABEL_W - 28 }}>
+                    {p.project_name}
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 600, marginTop: 1 }}>
+                    {getAreaName(p.territory_id, p.territory_name)}
+                  </div>
+                  {p.job_number && <div style={{ fontSize: 10, color: 'var(--muted)', marginTop: 1 }}>#{p.job_number}</div>}
+                </td>
+                {/* day cells */}
+                {days.map((d) => {
+                  const str    = isoDate(d);
+                  const isToday = str === todayStr;
+                  const isMon  = d.getDay() === 1;
+                  const inRange = startStr && endStr && str >= startStr && str <= endStr;
+                  const isStart = str === startStr;
+                  const isEnd   = str === endStr;
+                  return (
+                    <td key={str} style={{
+                      padding: 0, height: 36,
+                      borderLeft: isMon ? '2px solid var(--line)' : '1px solid color-mix(in srgb, var(--line) 50%, transparent)',
+                      background: isToday ? 'color-mix(in srgb, var(--brand) 5%, transparent)' : undefined,
+                      position: 'relative',
+                    }}>
+                      {inRange && (
+                        <div style={{
+                          position: 'absolute', top: '50%', transform: 'translateY(-50%)',
+                          left: isStart ? 4 : 0,
+                          right: isEnd ? 4 : 0,
+                          height: 22, background: color, opacity: 0.85,
+                          borderRadius: isStart && isEnd ? 6 : isStart ? '6px 0 0 6px' : isEnd ? '0 6px 6px 0' : 0,
+                          display: 'flex', alignItems: 'center', overflow: 'hidden',
+                        }}>
+                          {isStart && (
+                            <span style={{ fontSize: 10, color: '#fff', fontWeight: 700, paddingLeft: 6, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {p.project_name}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {!startStr && (
+                        <div style={{ fontSize: 9, color: 'var(--muted)', textAlign: 'center', paddingTop: 10 }}>—</div>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -1524,42 +1617,33 @@ function InstallerProfile({ installer, onClose }) {
 // ─── Material Tracking Board ─────────────────────────────────────────────────
 
 const MATERIAL_STAGES = [
-  { id: 'schedule_calls', label: 'Schedule Calls',  color: '#6c8ebf' },
-  { id: 'measures',       label: 'Measures',         color: '#e09c4a' },
-  { id: 'orders',         label: 'Orders',           color: '#9b59b6' },
-  { id: 'deliveries',     label: 'Deliveries',       color: '#2980b9' },
-  { id: 'in_stock',       label: 'In Stock',         color: '#2a9d8f' },
+  { id: 'schedule_calls', label: 'Schedule Calls' },
+  { id: 'measures',       label: 'Measures'       },
+  { id: 'orders',         label: 'Orders'         },
+  { id: 'deliveries',     label: 'Deliveries'     },
+  { id: 'in_stock',       label: 'In Stock'       },
 ];
 
-function MaterialCard({ item, onMove, onDelete }) {
-  const stageIdx  = MATERIAL_STAGES.findIndex((s) => s.id === item.stage);
-  const canBack   = stageIdx > 0;
-  const canForward = stageIdx < MATERIAL_STAGES.length - 1;
+const MAT_STAGE_COLOR = 'color-mix(in srgb, var(--brand-dark) 50%, white)';
 
-  return (
-    <div className="mat-card">
-      <div className="mat-card-head">
-        <strong>{item.project_name || item.linked_project_name || 'Unnamed'}</strong>
-        <button type="button" onClick={() => onDelete(item.id)} className="mat-del-btn">✕</button>
-      </div>
-      {item.city        && <div className="mat-detail">📍 {item.city}</div>}
-      {item.assigned_to && <div className="mat-detail">👤 {item.assigned_to}</div>}
-      {item.vendor      && <div className="mat-detail">🏭 {item.vendor}</div>}
-      {item.eta         && <div className="mat-detail">ETA: {shortDate(item.eta)}</div>}
-      {item.notes       && <div className="mat-notes">{item.notes}</div>}
-      {item.billed      && <span className="mat-billed-badge">Billed</span>}
-      <div className="mat-card-actions">
-        {canBack    && <button type="button" onClick={() => onMove(item, MATERIAL_STAGES[stageIdx - 1].id)}>← Back</button>}
-        {canForward && <button type="button" onClick={() => onMove(item, MATERIAL_STAGES[stageIdx + 1].id)}>Forward →</button>}
-      </div>
-    </div>
-  );
-}
+const MAT_COLS = [
+  { key: 'project_name',    label: 'Project',       w: '16%' },
+  { key: 'city',            label: 'City',           w: '9%'  },
+  { key: 'assigned_to',     label: 'Who',            w: '10%' },
+  { key: 'scheduled_date',  label: 'When',           w: '9%'  },
+  { key: 'install_date',    label: 'Install',        w: '9%'  },
+  { key: 'vendor',          label: 'Vendor',         w: '12%' },
+  { key: 'notes',           label: 'Notes / ETA / Tracking', w: '27%' },
+];
+
+const EMPTY_MAT_FORM = { project_name: '', city: '', assigned_to: '', scheduled_date: '', install_date: '', vendor: '', notes: '', eta: '', tracking_number: '' };
 
 function MaterialBoard() {
   const [items, setItems]       = useState(null);
-  const [adding, setAdding]     = useState(null); // stage id being added to
-  const [form, setForm]         = useState({ project_name: '', city: '', assigned_to: '', vendor: '', notes: '', eta: '' });
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [addingStage, setAddingStage] = useState(null);
+  const [addForm, setAddForm]   = useState(EMPTY_MAT_FORM);
 
   useEffect(() => {
     fetch('/api/materials', { credentials: 'include' })
@@ -1568,14 +1652,15 @@ function MaterialBoard() {
       .catch(() => setItems([]));
   }, []);
 
-  async function handleMove(item, newStage) {
-    const res = await fetch(`/api/materials/${item.id}`, {
+  async function handleSave(id) {
+    const res = await fetch(`/api/materials/${id}`, {
       method: 'PATCH', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ stage: newStage }),
+      body: JSON.stringify(editForm),
     });
     const updated = await res.json();
-    setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)));
+    setItems((prev) => prev.map((i) => (i.id === id ? updated : i)));
+    setEditingId(null);
   }
 
   async function handleAdd(e, stage) {
@@ -1583,59 +1668,160 @@ function MaterialBoard() {
     const res = await fetch('/api/materials', {
       method: 'POST', credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...form, stage }),
+      body: JSON.stringify({ ...addForm, stage }),
     });
     const row = await res.json();
     setItems((prev) => [...prev, row]);
-    setForm({ project_name: '', city: '', assigned_to: '', vendor: '', notes: '', eta: '' });
-    setAdding(null);
+    setAddForm(EMPTY_MAT_FORM);
+    setAddingStage(null);
   }
 
   async function handleDelete(id) {
+    if (!window.confirm('Remove this item?')) return;
     await fetch(`/api/materials/${id}`, { method: 'DELETE', credentials: 'include' });
     setItems((prev) => prev.filter((i) => i.id !== id));
   }
 
   if (items === null) return <div style={{ padding: 24, color: 'var(--muted)' }}>Loading materials…</div>;
 
+  const tdStyle = { padding: '7px 10px', fontSize: 12, verticalAlign: 'middle', borderRight: '1px solid var(--line)' };
+  const inputStyle = { width: '100%', padding: '4px 6px', fontSize: 12, border: '1px solid var(--line)', borderRadius: 4, background: 'var(--surface)', color: 'var(--ink)', boxSizing: 'border-box' };
+
   return (
-    <div>
-      <div className="mat-board">
-        {MATERIAL_STAGES.map((stage) => {
-          const stageItems = items.filter((i) => i.stage === stage.id);
-          return (
-            <div key={stage.id} className="mat-column">
-              <div className="mat-col-head" style={{ borderTopColor: stage.color }}>
-                <span>{stage.label}</span>
-                <span className="mat-count">{stageItems.length}</span>
-              </div>
+    <div className="panel" style={{ overflow: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+        <thead>
+          <tr style={{ background: 'var(--bg)', borderBottom: '2px solid var(--line)' }}>
+            {MAT_COLS.map((c) => (
+              <th key={c.key} style={{ padding: '9px 10px', textAlign: 'left', fontSize: 11, fontWeight: 700,
+                textTransform: 'uppercase', color: 'var(--muted)', letterSpacing: '.04em',
+                width: c.w, borderRight: '1px solid var(--line)' }}>{c.label}</th>
+            ))}
+            <th style={{ width: '8%', padding: '9px 10px', borderRight: 0 }} />
+          </tr>
+        </thead>
+        <tbody>
+          {MATERIAL_STAGES.map((stage) => {
+            const stageItems = items.filter((i) => i.stage === stage.id);
+            const stageIdx   = MATERIAL_STAGES.findIndex((s) => s.id === stage.id);
+            return (
+              <React.Fragment key={stage.id}>
+                {/* section header */}
+                <tr>
+                  <td colSpan={MAT_COLS.length + 1} style={{
+                    background: MAT_STAGE_COLOR, color: '#fff',
+                    padding: '7px 14px', fontWeight: 700, fontSize: 13, letterSpacing: '.03em',
+                    borderTop: '1px solid var(--line)',
+                  }}>
+                    {stage.label}
+                    <span style={{ fontWeight: 400, fontSize: 11, marginLeft: 10, opacity: 0.8 }}>
+                      {stageItems.length} {stageItems.length === 1 ? 'item' : 'items'}
+                    </span>
+                  </td>
+                </tr>
 
-              <div className="mat-cards">
-                {stageItems.map((item) => (
-                  <MaterialCard key={item.id} item={item} onMove={handleMove} onDelete={handleDelete} />
+                {/* data rows */}
+                {stageItems.map((item) => editingId === item.id ? (
+                  <tr key={item.id} style={{ background: 'color-mix(in srgb, var(--brand) 4%, transparent)', borderBottom: '1px solid var(--line)' }}>
+                    <td colSpan={MAT_COLS.length + 1} style={{ padding: '10px 14px' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                        {MAT_COLS.map((c) => (
+                          <div key={c.key} style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: c.key === 'notes' ? '2 1 200px' : '1 1 110px' }}>
+                            <label style={{ fontSize: 10, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>{c.label}</label>
+                            {c.key === 'scheduled_date' || c.key === 'install_date' ? (
+                              <input type="date" style={inputStyle} value={editForm[c.key] || ''}
+                                onChange={(e) => setEditForm((f) => ({ ...f, [c.key]: e.target.value }))} />
+                            ) : (
+                              <input style={inputStyle} placeholder={c.key === 'notes' ? 'Notes · ETA · Tracking #' : ''}
+                                value={editForm[c.key] || ''}
+                                onChange={(e) => setEditForm((f) => ({ ...f, [c.key]: e.target.value }))} />
+                            )}
+                          </div>
+                        ))}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: '1 1 130px' }}>
+                          <label style={{ fontSize: 10, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>Stage</label>
+                          <select value={editForm.stage || stage.id}
+                            onChange={(e) => setEditForm((f) => ({ ...f, stage: e.target.value }))}
+                            style={inputStyle}>
+                            {MATERIAL_STAGES.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
+                          </select>
+                        </div>
+                        <div style={{ display: 'flex', gap: 6, alignSelf: 'flex-end', paddingBottom: 1 }}>
+                          <button onClick={() => handleSave(item.id)}
+                            style={{ fontSize: 12, padding: '5px 16px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 5, cursor: 'pointer', fontWeight: 700 }}>Save</button>
+                          <button onClick={() => setEditingId(null)}
+                            style={{ fontSize: 12, padding: '5px 10px', background: 'transparent', border: '1px solid var(--line)', borderRadius: 5, cursor: 'pointer', color: 'var(--ink)' }}>Cancel</button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  <tr key={item.id} style={{ borderBottom: '1px solid var(--line)' }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = 'color-mix(in srgb, var(--brand) 3%, transparent)'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = ''}>
+                    <td style={{ ...tdStyle, fontWeight: 600 }}>{item.project_name || item.linked_project_name || <span style={{ color: 'var(--muted)' }}>—</span>}</td>
+                    <td style={tdStyle}>{item.city || <span style={{ color: 'var(--muted)' }}>—</span>}</td>
+                    <td style={tdStyle}>{item.assigned_to || <span style={{ color: 'var(--muted)' }}>—</span>}</td>
+                    <td style={tdStyle}>{item.scheduled_date ? shortDate(item.scheduled_date) : <span style={{ color: 'var(--muted)' }}>mm/dd</span>}</td>
+                    <td style={tdStyle}>{item.install_date ? shortDate(item.install_date) : <span style={{ color: 'var(--muted)' }}>mm/dd</span>}</td>
+                    <td style={tdStyle}>{item.vendor || <span style={{ color: 'var(--muted)' }}>—</span>}</td>
+                    <td style={tdStyle}>
+                      <span>{item.notes || ''}</span>
+                      {item.eta && <span style={{ color: 'var(--muted)', marginLeft: item.notes ? 6 : 0 }}>ETA: {shortDate(item.eta)}</span>}
+                      {item.tracking_number && <span style={{ color: 'var(--muted)', marginLeft: 6 }}>#{item.tracking_number}</span>}
+                      {!item.notes && !item.eta && !item.tracking_number && <span style={{ color: 'var(--muted)' }}>—</span>}
+                    </td>
+                    <td style={{ ...tdStyle, borderRight: 0, whiteSpace: 'nowrap' }}>
+                      <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                        <button title="Edit" onClick={() => { setEditingId(item.id); setEditForm({ stage: item.stage, project_name: item.project_name || '', city: item.city || '', assigned_to: item.assigned_to || '', scheduled_date: item.scheduled_date?.slice(0,10) || '', install_date: item.install_date?.slice(0,10) || '', vendor: item.vendor || '', notes: item.notes || '' }); }}
+                          style={{ fontSize: 11, padding: '2px 7px', background: 'transparent', border: '1px solid var(--line)', borderRadius: 3, cursor: 'pointer', color: 'var(--ink)' }}>✎</button>
+                        <button title="Delete" onClick={() => handleDelete(item.id)}
+                          style={{ fontSize: 11, padding: '2px 6px', background: 'transparent', border: '1px solid #e74c3c', borderRadius: 3, cursor: 'pointer', color: '#e74c3c' }}>✕</button>
+                      </div>
+                    </td>
+                  </tr>
                 ))}
-              </div>
 
-              {adding === stage.id ? (
-                <form className="mat-add-form" onSubmit={(e) => handleAdd(e, stage.id)}>
-                  <input required placeholder="Project / job name" value={form.project_name} onChange={(e) => setForm({ ...form, project_name: e.target.value })} />
-                  <input placeholder="City" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
-                  <input placeholder="Assigned to" value={form.assigned_to} onChange={(e) => setForm({ ...form, assigned_to: e.target.value })} />
-                  <input placeholder="Vendor" value={form.vendor} onChange={(e) => setForm({ ...form, vendor: e.target.value })} />
-                  <input type="date" placeholder="ETA" value={form.eta} onChange={(e) => setForm({ ...form, eta: e.target.value })} />
-                  <textarea placeholder="Notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} />
-                  <div style={{ display: 'flex', gap: 6 }}>
-                    <button type="submit">Add</button>
-                    <button type="button" onClick={() => setAdding(null)} style={{ background: 'transparent', color: 'var(--muted)', border: '1px solid var(--line)' }}>Cancel</button>
-                  </div>
-                </form>
-              ) : (
-                <button type="button" className="mat-add-btn" onClick={() => setAdding(stage.id)}>+ Add item</button>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                {/* add row form */}
+                {addingStage === stage.id ? (
+                  <tr style={{ borderBottom: '1px solid var(--line)', background: 'color-mix(in srgb, var(--brand) 4%, transparent)' }}>
+                    {MAT_COLS.map((c) => (
+                      <td key={c.key} style={tdStyle}>
+                        {c.key === 'scheduled_date' || c.key === 'install_date' ? (
+                          <input type="date" style={inputStyle} value={addForm[c.key] || ''}
+                            onChange={(e) => setAddForm((f) => ({ ...f, [c.key]: e.target.value }))} />
+                        ) : (
+                          <input style={inputStyle}
+                            placeholder={c.key === 'project_name' ? 'Project name *' : c.key === 'notes' ? 'Notes · ETA · Tracking #' : ''}
+                            value={addForm[c.key] || ''}
+                            onChange={(e) => setAddForm((f) => ({ ...f, [c.key]: e.target.value }))} />
+                        )}
+                      </td>
+                    ))}
+                    <td style={{ ...tdStyle, borderRight: 0 }}>
+                      <form onSubmit={(e) => handleAdd(e, stage.id)} style={{ display: 'flex', gap: 4 }}>
+                        <button type="submit"
+                          style={{ fontSize: 11, padding: '3px 10px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>Add</button>
+                        <button type="button" onClick={() => setAddingStage(null)}
+                          style={{ fontSize: 11, padding: '3px 8px', background: 'transparent', border: '1px solid var(--line)', borderRadius: 4, cursor: 'pointer', color: 'var(--ink)' }}>✕</button>
+                      </form>
+                    </td>
+                  </tr>
+                ) : (
+                  <tr style={{ borderBottom: '2px solid var(--line)' }}>
+                    <td colSpan={MAT_COLS.length + 1} style={{ padding: '6px 14px' }}>
+                      <button onClick={() => { setAddingStage(stage.id); setAddForm(EMPTY_MAT_FORM); }}
+                        style={{ fontSize: 12, color: 'var(--muted)', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+                        + Add row
+                      </button>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -1876,24 +2062,31 @@ function downloadCSV(filename, csv) {
 
 // ─── Team / User Management ───────────────────────────────────────────────────
 
-const EMPTY_USER_FORM = { name: '', email: '', password: '', role_id: '', phone: '' };
+const EMPTY_USER_FORM = { name: '', email: '', password: '', role_id: '', phone: '', territory_id: '' };
+const TERRITORY_OPTIONS = [{ id: 1, name: 'Charlotte Metro' }, { id: 2, name: 'Lake Norman' }, { id: 3, name: 'South Carolina' }, { id: 4, name: 'Triad' }];
+const SELECT_STYLE = { padding: '6px 10px', border: '1px solid var(--line)', borderRadius: 5, fontSize: 12, background: 'var(--surface)', color: 'var(--ink)', flex: '1 1 120px' };
 
 function TeamView() {
-  const [users, setUsers]       = useState(null);
-  const [roles, setRoles]       = useState([]);
-  const [form, setForm]         = useState(EMPTY_USER_FORM);
+  const [users, setUsers]         = useState(null);
+  const [roles, setRoles]         = useState([]);
+  const [projects, setProjects]   = useState([]);
+  const [form, setForm]           = useState(EMPTY_USER_FORM);
   const [editingId, setEditingId] = useState(null);
-  const [editForm, setEditForm] = useState({});
-  const [error, setError]       = useState('');
-  const [saving, setSaving]     = useState(false);
+  const [editForm, setEditForm]   = useState({});
+  const [assigningId, setAssigningId] = useState(null);
+  const [assignProjectId, setAssignProjectId] = useState('');
+  const [error, setError]         = useState('');
+  const [saving, setSaving]       = useState(false);
 
   useEffect(() => {
     Promise.all([
       fetch('/api/users', { credentials: 'include' }).then((r) => r.json()),
       fetch('/api/users/roles', { credentials: 'include' }).then((r) => r.json()),
-    ]).then(([ud, rd]) => {
+      fetch('/api/users/projects-list', { credentials: 'include' }).then((r) => r.json()),
+    ]).then(([ud, rd, pd]) => {
       setUsers(ud.users || []);
       setRoles(rd.roles || []);
+      setProjects(pd.projects || []);
     }).catch(() => setUsers([]));
   }, []);
 
@@ -1916,8 +2109,30 @@ function TeamView() {
       const res = await fetch(`/api/users/${id}`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editForm) });
       const data = await res.json();
       if (!res.ok) { setError(data.error || 'Update failed'); return; }
-      setUsers((prev) => prev.map((u) => u.id === id ? { ...u, ...data.user, role_name: roles.find((r) => r.id === Number(editForm.role_id))?.name || null } : u));
+      setUsers((prev) => prev.map((u) => u.id === id ? {
+        ...u, ...data.user,
+        role_name: roles.find((r) => r.id === Number(editForm.role_id))?.name || null,
+        territory_name: TERRITORY_OPTIONS.find((t) => t.id === Number(editForm.territory_id))?.name || null,
+      } : u));
       setEditingId(null);
+    } catch { setError('Network error'); }
+  }
+
+  async function handleAssignProject(userId) {
+    if (!assignProjectId) return;
+    try {
+      const res = await fetch(`/api/users/${userId}/projects`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ project_id: assignProjectId, relationship_type: 'installer' }) });
+      if (!res.ok) return;
+      const proj = projects.find((p) => p.id === Number(assignProjectId));
+      setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, current_job: proj?.project_name, current_project_id: proj?.id } : u));
+      setAssigningId(null); setAssignProjectId('');
+    } catch { setError('Network error'); }
+  }
+
+  async function handleUnassignProject(userId, projectId) {
+    try {
+      await fetch(`/api/users/${userId}/projects/${projectId}`, { method: 'DELETE', credentials: 'include' });
+      setUsers((prev) => prev.map((u) => u.id === userId ? { ...u, current_job: null, current_project_id: null } : u));
     } catch { setError('Network error'); }
   }
 
@@ -1928,8 +2143,6 @@ function TeamView() {
       setUsers((prev) => prev.map((u) => u.id === id ? { ...u, active: false } : u));
     } catch { setError('Network error'); }
   }
-
-  const roleLabel = (u) => u.role_name || '—';
 
   return (
     <>
@@ -1944,14 +2157,16 @@ function TeamView() {
                 style={{ padding: '7px 10px', border: '1px solid var(--line)', borderRadius: 6, fontSize: 13, background: 'var(--surface)', color: 'var(--ink)' }} />
             </div>
           ))}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: '1 1 140px' }}>
-            <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>Role</label>
-            <select value={form.role_id} onChange={(e) => setForm((f) => ({ ...f, role_id: e.target.value }))}
-              style={{ padding: '7px 10px', border: '1px solid var(--line)', borderRadius: 6, fontSize: 13, background: 'var(--surface)', color: 'var(--ink)' }}>
-              <option value="">— No role —</option>
-              {roles.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
-            </select>
-          </div>
+          {[['role_id','Role',roles.map((r) => ({ value: r.id, label: r.name }))], ['territory_id','Territory', TERRITORY_OPTIONS.map((t) => ({ value: t.id, label: t.name }))]].map(([field, label, opts]) => (
+            <div key={field} style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: '1 1 140px' }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>{label}</label>
+              <select value={form[field]} onChange={(e) => setForm((f) => ({ ...f, [field]: e.target.value }))}
+                style={{ padding: '7px 10px', border: '1px solid var(--line)', borderRadius: 6, fontSize: 13, background: 'var(--surface)', color: 'var(--ink)' }}>
+                <option value="">— None —</option>
+                {opts.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+            </div>
+          ))}
           <button type="submit" disabled={saving} style={{ padding: '8px 18px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 6, fontSize: 13, fontWeight: 700, cursor: 'pointer', alignSelf: 'flex-end' }}>
             {saving ? 'Adding…' : 'Add Member'}
           </button>
@@ -1966,28 +2181,31 @@ function TeamView() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ background: 'var(--bg)', borderBottom: '2px solid var(--line)' }}>
-                {['Name','Email','Phone','Role','Status',''].map((h) => (
+                {['Name','Email','Role','Territory','Current Project','Status',''].map((h) => (
                   <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: 'var(--muted)', letterSpacing: '.05em' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {users.length === 0 && (
-                <tr><td colSpan="6" style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>No team members yet.</td></tr>
+                <tr><td colSpan="7" style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>No team members yet.</td></tr>
               )}
               {users.map((u) => editingId === u.id ? (
                 <tr key={u.id} style={{ borderBottom: '1px solid var(--line)', background: 'color-mix(in srgb, var(--brand) 4%, transparent)' }}>
-                  <td colSpan="6" style={{ padding: '8px 14px' }}>
+                  <td colSpan="7" style={{ padding: '8px 14px' }}>
                     <form onSubmit={(e) => handleUpdate(e, u.id)} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                       {['name','email','phone'].map((n) => (
                         <input key={n} placeholder={n} value={editForm[n] || ''} required={n !== 'phone'}
                           onChange={(e) => setEditForm((f) => ({ ...f, [n]: e.target.value }))}
-                          style={{ flex: '1 1 120px', padding: '6px 10px', border: '1px solid var(--line)', borderRadius: 5, fontSize: 12, background: 'var(--surface)', color: 'var(--ink)' }} />
+                          style={SELECT_STYLE} />
                       ))}
-                      <select value={editForm.role_id || ''} onChange={(e) => setEditForm((f) => ({ ...f, role_id: e.target.value }))}
-                        style={{ flex: '1 1 120px', padding: '6px 10px', border: '1px solid var(--line)', borderRadius: 5, fontSize: 12, background: 'var(--surface)', color: 'var(--ink)' }}>
+                      <select value={editForm.role_id || ''} onChange={(e) => setEditForm((f) => ({ ...f, role_id: e.target.value }))} style={SELECT_STYLE}>
                         <option value="">— No role —</option>
                         {roles.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+                      </select>
+                      <select value={editForm.territory_id || ''} onChange={(e) => setEditForm((f) => ({ ...f, territory_id: e.target.value }))} style={SELECT_STYLE}>
+                        <option value="">— No territory —</option>
+                        {TERRITORY_OPTIONS.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
                       </select>
                       <button type="submit" style={{ padding: '6px 14px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 5, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Save</button>
                       <button type="button" onClick={() => setEditingId(null)} style={{ padding: '6px 14px', background: 'transparent', border: '1px solid var(--line)', borderRadius: 5, fontSize: 12, cursor: 'pointer', color: 'var(--ink)' }}>Cancel</button>
@@ -1996,18 +2214,44 @@ function TeamView() {
                 </tr>
               ) : (
                 <tr key={u.id} style={{ borderBottom: '1px solid var(--line)' }}>
-                  <td style={{ padding: '10px 14px', fontWeight: 600 }}>{u.name}</td>
+                  <td style={{ padding: '10px 14px', fontWeight: 600 }}>{u.name}<div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 400 }}>{u.phone || ''}</div></td>
                   <td style={{ padding: '10px 14px', color: 'var(--muted)' }}>{u.email}</td>
-                  <td style={{ padding: '10px 14px', color: 'var(--muted)' }}>{u.phone || '—'}</td>
-                  <td style={{ padding: '10px 14px' }}><span className="badge badge-role">{roleLabel(u)}</span></td>
-                  <td style={{ padding: '10px 14px' }}><span className={`badge badge-${u.active ? 'active' : 'pending'}`}>{u.active ? 'Active' : 'Inactive'}</span></td>
-                  <td style={{ padding: '10px 14px', display: 'flex', gap: 6 }}>
-                    <button onClick={() => { setEditingId(u.id); setEditForm({ name: u.name, email: u.email, phone: u.phone || '', role_id: u.role_id || '' }); }}
-                      style={{ fontSize: 11, padding: '4px 10px', background: 'transparent', border: '1px solid var(--line)', borderRadius: 4, cursor: 'pointer', color: 'var(--ink)' }}>Edit</button>
-                    {u.active && (
-                      <button onClick={() => handleDeactivate(u.id, u.name)}
-                        style={{ fontSize: 11, padding: '4px 10px', background: 'transparent', border: '1px solid #e74c3c', borderRadius: 4, cursor: 'pointer', color: '#e74c3c' }}>Deactivate</button>
+                  <td style={{ padding: '10px 14px' }}>{u.role_name ? <span className="badge badge-role">{u.role_name}</span> : <span style={{ color: 'var(--muted)' }}>—</span>}</td>
+                  <td style={{ padding: '10px 14px', color: 'var(--muted)' }}>{u.territory_name || '—'}</td>
+                  <td style={{ padding: '10px 14px' }}>
+                    {assigningId === u.id ? (
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <select value={assignProjectId} onChange={(e) => setAssignProjectId(e.target.value)}
+                          style={{ ...SELECT_STYLE, minWidth: 160 }}>
+                          <option value="">— Select project —</option>
+                          {projects.map((p) => <option key={p.id} value={p.id}>{p.job_number ? `${p.job_number} – ${p.project_name}` : p.project_name}</option>)}
+                        </select>
+                        <button onClick={() => handleAssignProject(u.id)}
+                          style={{ fontSize: 11, padding: '4px 10px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>Assign</button>
+                        <button onClick={() => { setAssigningId(null); setAssignProjectId(''); }}
+                          style={{ fontSize: 11, padding: '4px 10px', background: 'transparent', border: '1px solid var(--line)', borderRadius: 4, cursor: 'pointer', color: 'var(--ink)' }}>Cancel</button>
+                      </div>
+                    ) : u.current_job ? (
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                        <span style={{ fontSize: 12 }}>{u.current_job}</span>
+                        <button onClick={() => handleUnassignProject(u.id, u.current_project_id)}
+                          style={{ fontSize: 10, padding: '2px 7px', background: 'transparent', border: '1px solid #e74c3c', borderRadius: 4, cursor: 'pointer', color: '#e74c3c' }}>✕</button>
+                      </div>
+                    ) : (
+                      <button onClick={() => setAssigningId(u.id)}
+                        style={{ fontSize: 11, padding: '4px 10px', background: 'transparent', border: '1px solid var(--line)', borderRadius: 4, cursor: 'pointer', color: 'var(--muted)' }}>+ Assign</button>
                     )}
+                  </td>
+                  <td style={{ padding: '10px 14px' }}><span className={`badge badge-${u.active ? 'active' : 'pending'}`}>{u.active ? 'Active' : 'Inactive'}</span></td>
+                  <td style={{ padding: '10px 14px' }}>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <button onClick={() => { setEditingId(u.id); setEditForm({ name: u.name, email: u.email, phone: u.phone || '', role_id: u.role_id || '', territory_id: u.territory_id || '' }); }}
+                        style={{ fontSize: 11, padding: '4px 10px', background: 'transparent', border: '1px solid var(--line)', borderRadius: 4, cursor: 'pointer', color: 'var(--ink)' }}>Edit</button>
+                      {u.active && (
+                        <button onClick={() => handleDeactivate(u.id, u.name)}
+                          style={{ fontSize: 11, padding: '4px 10px', background: 'transparent', border: '1px solid #e74c3c', borderRadius: 4, cursor: 'pointer', color: '#e74c3c' }}>Deactivate</button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
