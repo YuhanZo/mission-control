@@ -1864,6 +1864,151 @@ function downloadCSV(filename, csv) {
   URL.revokeObjectURL(url);
 }
 
+// ─── Team / User Management ───────────────────────────────────────────────────
+
+const EMPTY_USER_FORM = { name: '', email: '', password: '', role_id: '', phone: '' };
+
+function TeamView() {
+  const [users, setUsers]       = useState(null);
+  const [roles, setRoles]       = useState([]);
+  const [form, setForm]         = useState(EMPTY_USER_FORM);
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({});
+  const [error, setError]       = useState('');
+  const [saving, setSaving]     = useState(false);
+
+  useEffect(() => {
+    Promise.all([
+      fetch('/api/users', { credentials: 'include' }).then((r) => r.json()),
+      fetch('/api/users/roles', { credentials: 'include' }).then((r) => r.json()),
+    ]).then(([ud, rd]) => {
+      setUsers(ud.users || []);
+      setRoles(rd.roles || []);
+    }).catch(() => setUsers([]));
+  }, []);
+
+  async function handleCreate(e) {
+    e.preventDefault();
+    setError(''); setSaving(true);
+    try {
+      const res = await fetch('/api/users', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || 'Failed to add member'); return; }
+      setUsers((prev) => [...prev, { ...data.user, role_name: roles.find((r) => r.id === Number(form.role_id))?.name || null }]);
+      setForm(EMPTY_USER_FORM);
+    } catch { setError('Network error'); }
+    finally { setSaving(false); }
+  }
+
+  async function handleUpdate(e, id) {
+    e.preventDefault();
+    try {
+      const res = await fetch(`/api/users/${id}`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(editForm) });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || 'Update failed'); return; }
+      setUsers((prev) => prev.map((u) => u.id === id ? { ...u, ...data.user, role_name: roles.find((r) => r.id === Number(editForm.role_id))?.name || null } : u));
+      setEditingId(null);
+    } catch { setError('Network error'); }
+  }
+
+  async function handleDeactivate(id, name) {
+    if (!window.confirm(`Deactivate "${name}"? They will no longer be able to log in.`)) return;
+    try {
+      await fetch(`/api/users/${id}/deactivate`, { method: 'PATCH', credentials: 'include' });
+      setUsers((prev) => prev.map((u) => u.id === id ? { ...u, active: false } : u));
+    } catch { setError('Network error'); }
+  }
+
+  const roleLabel = (u) => u.role_name || '—';
+
+  return (
+    <>
+      <section className="panel" style={{ marginBottom: 18 }}>
+        <div className="panel-head"><h2>Add Team Member</h2></div>
+        <form onSubmit={handleCreate} style={{ padding: '16px 18px', display: 'flex', flexWrap: 'wrap', gap: 10, alignItems: 'flex-end' }}>
+          {error && <div style={{ width: '100%', color: '#e74c3c', fontSize: 13 }}>{error}</div>}
+          {[['name','Name','text',true],['email','Email','email',true],['password','Password','password',true],['phone','Phone','text',false]].map(([n,l,t,req]) => (
+            <div key={n} style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: '1 1 160px' }}>
+              <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>{l}{req && ' *'}</label>
+              <input name={n} type={t} value={form[n]} required={req} onChange={(e) => setForm((f) => ({ ...f, [n]: e.target.value }))}
+                style={{ padding: '7px 10px', border: '1px solid var(--line)', borderRadius: 6, fontSize: 13, background: 'var(--surface)', color: 'var(--ink)' }} />
+            </div>
+          ))}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flex: '1 1 140px' }}>
+            <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>Role</label>
+            <select value={form.role_id} onChange={(e) => setForm((f) => ({ ...f, role_id: e.target.value }))}
+              style={{ padding: '7px 10px', border: '1px solid var(--line)', borderRadius: 6, fontSize: 13, background: 'var(--surface)', color: 'var(--ink)' }}>
+              <option value="">— No role —</option>
+              {roles.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+            </select>
+          </div>
+          <button type="submit" disabled={saving} style={{ padding: '8px 18px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 6, fontSize: 13, fontWeight: 700, cursor: 'pointer', alignSelf: 'flex-end' }}>
+            {saving ? 'Adding…' : 'Add Member'}
+          </button>
+        </form>
+      </section>
+
+      <section className="panel table-panel">
+        <div className="panel-head"><h2>Team Members</h2><span>{users ? `${users.length} members` : '…'}</span></div>
+        {!users ? (
+          <div style={{ padding: 24, color: 'var(--muted)' }}>Loading…</div>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ background: 'var(--bg)', borderBottom: '2px solid var(--line)' }}>
+                {['Name','Email','Phone','Role','Status',''].map((h) => (
+                  <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: 'var(--muted)', letterSpacing: '.05em' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {users.length === 0 && (
+                <tr><td colSpan="6" style={{ padding: 24, color: 'var(--muted)', textAlign: 'center' }}>No team members yet.</td></tr>
+              )}
+              {users.map((u) => editingId === u.id ? (
+                <tr key={u.id} style={{ borderBottom: '1px solid var(--line)', background: 'color-mix(in srgb, var(--brand) 4%, transparent)' }}>
+                  <td colSpan="6" style={{ padding: '8px 14px' }}>
+                    <form onSubmit={(e) => handleUpdate(e, u.id)} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                      {['name','email','phone'].map((n) => (
+                        <input key={n} placeholder={n} value={editForm[n] || ''} required={n !== 'phone'}
+                          onChange={(e) => setEditForm((f) => ({ ...f, [n]: e.target.value }))}
+                          style={{ flex: '1 1 120px', padding: '6px 10px', border: '1px solid var(--line)', borderRadius: 5, fontSize: 12, background: 'var(--surface)', color: 'var(--ink)' }} />
+                      ))}
+                      <select value={editForm.role_id || ''} onChange={(e) => setEditForm((f) => ({ ...f, role_id: e.target.value }))}
+                        style={{ flex: '1 1 120px', padding: '6px 10px', border: '1px solid var(--line)', borderRadius: 5, fontSize: 12, background: 'var(--surface)', color: 'var(--ink)' }}>
+                        <option value="">— No role —</option>
+                        {roles.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
+                      </select>
+                      <button type="submit" style={{ padding: '6px 14px', background: 'var(--brand)', color: '#fff', border: 'none', borderRadius: 5, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Save</button>
+                      <button type="button" onClick={() => setEditingId(null)} style={{ padding: '6px 14px', background: 'transparent', border: '1px solid var(--line)', borderRadius: 5, fontSize: 12, cursor: 'pointer', color: 'var(--ink)' }}>Cancel</button>
+                    </form>
+                  </td>
+                </tr>
+              ) : (
+                <tr key={u.id} style={{ borderBottom: '1px solid var(--line)' }}>
+                  <td style={{ padding: '10px 14px', fontWeight: 600 }}>{u.name}</td>
+                  <td style={{ padding: '10px 14px', color: 'var(--muted)' }}>{u.email}</td>
+                  <td style={{ padding: '10px 14px', color: 'var(--muted)' }}>{u.phone || '—'}</td>
+                  <td style={{ padding: '10px 14px' }}><span className="badge badge-role">{roleLabel(u)}</span></td>
+                  <td style={{ padding: '10px 14px' }}><span className={`badge badge-${u.active ? 'active' : 'pending'}`}>{u.active ? 'Active' : 'Inactive'}</span></td>
+                  <td style={{ padding: '10px 14px', display: 'flex', gap: 6 }}>
+                    <button onClick={() => { setEditingId(u.id); setEditForm({ name: u.name, email: u.email, phone: u.phone || '', role_id: u.role_id || '' }); }}
+                      style={{ fontSize: 11, padding: '4px 10px', background: 'transparent', border: '1px solid var(--line)', borderRadius: 4, cursor: 'pointer', color: 'var(--ink)' }}>Edit</button>
+                    {u.active && (
+                      <button onClick={() => handleDeactivate(u.id, u.name)}
+                        style={{ fontSize: 11, padding: '4px 10px', background: 'transparent', border: '1px solid #e74c3c', borderRadius: 4, cursor: 'pointer', color: '#e74c3c' }}>Deactivate</button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+    </>
+  );
+}
+
 function ReportsView({ projects = [], billings = [], bids = [], customers = [], installers = [] }) {
   const exportFns = {
     'Project Status Summary':     () => downloadCSV('project-status.csv', toCSV([
@@ -2012,6 +2157,7 @@ function ProjectManagerDashboard({ user }) {
     ['messages',  'Messages'],
     ['documents', 'Documents'],
     ['alerts',    'Alerts'],
+    ['team',      'Team'],
     ['settings',  'Settings'],
   ];
   const currentLabel = [...navMain, ...navUtil].find(([id]) => id === activeView)?.[1] || '';
@@ -2095,6 +2241,7 @@ function ProjectManagerDashboard({ user }) {
         {activeView === 'messages'   && <PlaceholderView key={areaId} title="Messages"  icon="💬" description="Team messaging and client communication threads coming soon." />}
         {activeView === 'documents'  && <PlaceholderView key={areaId} title="Documents" icon="📄" description="Contract storage, submittals, and closeout packages coming soon." />}
         {activeView === 'alerts'     && <PlaceholderView key={areaId} title="Alerts"    icon="🔔" description="Smart notifications for overdue invoices, schedule conflicts, and OT flags." />}
+        {activeView === 'team'       && <TeamView        key={areaId} />}
         {activeView === 'settings'   && <PlaceholderView key={areaId} title="Settings"  icon="⚙️" description="User preferences, territory assignments, and notification settings coming soon." />}
       </main>
     </div>
