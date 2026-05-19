@@ -2190,7 +2190,10 @@ function ProjectManagerDashboard({ user }) {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand"><strong>James Blinds</strong><span>Mission Control</span></div>
+        <div className="brand">
+          <img src="/logo.png" alt="James Blinds" style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: 8, background: 'rgba(255,255,255,0.92)', padding: 4, marginBottom: 8, display: 'block' }} />
+          <strong>James Blinds</strong><span>Mission Control</span>
+        </div>
         {navMain.map(([id, label]) => (
           <button key={id} className={activeView === id ? 'nav-active' : ''} onClick={() => setActiveView(id)} type="button">{label}</button>
         ))}
@@ -3374,7 +3377,10 @@ function ChiefEstimatorDashboard({ user }) {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand"><strong>James Blinds</strong><span>Mission Control</span></div>
+        <div className="brand">
+          <img src="/logo.png" alt="James Blinds" style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: 8, background: 'rgba(255,255,255,0.92)', padding: 4, marginBottom: 8, display: 'block' }} />
+          <strong>James Blinds</strong><span>Mission Control</span>
+        </div>
         {navGroups.map((group, gi) => (
           <React.Fragment key={gi}>
             {group.label && <div className="nav-section-label">{group.label}</div>}
@@ -3470,7 +3476,10 @@ function EstimatorDashboard({ user }) {
   return (
     <div className="app-shell">
       <aside className="sidebar">
-        <div className="brand"><strong>James Blinds</strong><span>Mission Control</span></div>
+        <div className="brand">
+          <img src="/logo.png" alt="James Blinds" style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: 8, background: 'rgba(255,255,255,0.92)', padding: 4, marginBottom: 8, display: 'block' }} />
+          <strong>James Blinds</strong><span>Mission Control</span>
+        </div>
         {navMain.map(([id, label]) => (
           <button key={id} className={activeView === id ? 'nav-active' : ''} onClick={() => setActiveView(id)} type="button">{label}</button>
         ))}
